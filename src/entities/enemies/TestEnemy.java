@@ -20,8 +20,6 @@ public class TestEnemy extends Enemy {
 	
 	@Override
 	public void update() {
-		ai.update();
-		
 		super.update();
 	}
 }

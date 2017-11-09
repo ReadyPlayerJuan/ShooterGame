@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import entities.enemies.Enemy;
-import entities.player.Bullet;
 import entities.player.Player;
 import maps.GameMap;
 import maps.MapHitboxes;
+import weapons.Bullet;
 
 public class EntityManager {
 	private static final int NUM_ENTITY_LAYERS = 3;

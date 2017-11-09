@@ -1,4 +1,4 @@
-package entities.player;
+package weapons;
 
 import org.lwjgl.util.vector.Vector2f;
 
