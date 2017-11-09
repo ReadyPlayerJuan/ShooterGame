@@ -1,0 +1,46 @@
+#version 140
+
+in vec2 textureCoords;
+
+out vec4 out_Color;
+
+uniform sampler2D colorTexture;
+
+const float contrast = 0.2;
+const float distortionRangeX = 3.14159 / 7.5;
+const float distortionRangeY = 3.14159 / 6;
+const vec4 edgeColor = vec4(0.06, 0.06, 0.06, 1);
+const float transition = 0.03;
+const int numLines = 70;
+const float lineSize = 0.7;
+const vec4 lineColor = vec4(0, 0, 0, 0.4);
+const vec4 tint = vec4(0.7, 0.5, 0.2, 0.1);
+
+void main(void){
+	vec2 distanceToCenter = textureCoords - vec2(0.5);
+	float distortionFactorY = 1 / (cos(distanceToCenter.x * distortionRangeY * 2));
+	float distortionFactorX = 1 / (cos(distanceToCenter.y * distortionRangeX * 2));
+	vec2 distortedCoords = vec2((distanceToCenter.x * distortionFactorX) + 0.5, (distanceToCenter.y * distortionFactorY) + 0.5);
+	
+	if(distortedCoords.y >= 1 || distortedCoords.y <= 0 || distortedCoords.x >= 1 || distortedCoords.x <= 0) {
+		out_Color = edgeColor;
+	} else {
+		out_Color = texture(colorTexture, distortedCoords);
+		
+		float onLine = ((distortedCoords.y * numLines) - floor(distortedCoords.y * numLines)) / lineSize;
+		onLine = clamp(onLine, 0, 1);
+		onLine = 1 - pow(abs((onLine * 2) - 1), 2);
+		out_Color = mix(vec4(lineColor.rgb, 1.0), out_Color, 1 - (onLine * lineColor.a));
+		
+		out_Color = mix(out_Color, vec4(0, 0, 0, 1), length(distanceToCenter) * 1.4);
+		out_Color = mix(out_Color, vec4(tint.rgb, 1.0), tint.a);
+		
+		float distanceToEdge = min(min(distortedCoords.y, 1-distortedCoords.y), min(distortedCoords.x, 1-distortedCoords.x));
+		distanceToEdge = clamp(distanceToEdge / transition, 0, 1);
+		distanceToEdge = pow(distanceToEdge, 3);
+		out_Color = mix(edgeColor, out_Color, distanceToEdge);
+	}
+	//out_Color = vec4(distortionFactor);
+	//out_Color.rgb = (out_Color.rgb - 0.5) * (1.0 + contrast) + 0.5;
+	//out_Color = texture(colorTexture, textureCoords);
+}

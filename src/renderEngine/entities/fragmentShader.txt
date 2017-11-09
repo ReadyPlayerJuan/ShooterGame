@@ -1,0 +1,15 @@
+#version 140
+
+in vec2 textureCoords;
+
+out vec4 out_Color;
+
+uniform sampler2D spriteTexture;
+
+void main(void){
+	out_Color = texture(spriteTexture, textureCoords);
+	
+	if(out_Color == vec4(1, 0, 1, 1)) {
+		discard;
+	}
+}
