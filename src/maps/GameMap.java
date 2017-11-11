@@ -7,8 +7,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import entities.Entity;
+import entities.enemies.Enemy;
 import entities.enemies.TestEnemy;
 import guis.GuiTexture;
+import hitboxes.LineHitbox;
 import loader.Loader;
 import postProcessing.Fbo;
 import textures.TextureManager;
@@ -16,7 +18,8 @@ import textures.TextureMap;
 
 public class GameMap {
 	private ArrayList<ArrayList<Integer>> backgroundMap, foregroundMap;
-	private List<Entity> backgroundEntities, dynamicEntities, foregroundEntities;
+	private List<Entity> backgroundEntities, foregroundEntities;
+	private List<Enemy> enemies;
 	
 	private int textureMapIndex;
 	TextureMap textureMap;
@@ -36,8 +39,8 @@ public class GameMap {
 		this.textureMap = TextureManager.getTexture(textureMapIndex);
 		
 		backgroundEntities = new ArrayList<Entity>();
-		dynamicEntities = new ArrayList<Entity>();
 		foregroundEntities = new ArrayList<Entity>();
+		enemies = new ArrayList<Enemy>();
 		
 		backgroundMap = loader.loadMap(fileName + "_Background");
 		foregroundMap = loader.loadMap(fileName + "_Foreground");
@@ -69,7 +72,7 @@ public class GameMap {
 			}
 		}
 		
-		dynamicEntities.add(new TestEnemy(new Vector2f(600, 600)));
+		enemies.add(new TestEnemy(new Vector2f(600, 600)));
 		
 		backgroundFbo = new Fbo(width, height, Fbo.NONE, GL11.GL_NEAREST);
 		entityFbo = new Fbo(width*1, height*1, Fbo.NONE, GL11.GL_NEAREST);
@@ -230,11 +233,11 @@ public class GameMap {
 		return backgroundEntities;
 	}
 	
-	public List<Entity> getDynamicEntities() {
-		return dynamicEntities;
-	}
-	
 	public List<Entity> getForegroundEntities() {
 		return foregroundEntities;
+	}
+	
+	public List<Enemy> getEnemies() {
+		return enemies;
 	}
 }

@@ -1,13 +1,15 @@
-package maps;
+package hitboxes;
 
 import org.lwjgl.util.vector.Vector2f;
+
 import toolbox.Maths.Direction;
 
 public class LineHitbox {
-	private Vector2f centerPosition;
 	private Vector2f endPoint1, endPoint2;
 	private Direction direction;
-	private float radius;
+	
+	protected Vector2f centerPosition;
+	protected float radius;
 	
 	public LineHitbox(Vector2f centerPosition, Direction direction, float radius) {
 		this.centerPosition = centerPosition;

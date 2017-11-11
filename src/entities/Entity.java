@@ -7,6 +7,8 @@ import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 
 public class Entity {
+	private int ID;
+	protected String entityType = "entity";
 	protected String name = "entity";
 	
 	protected Vector2f position;
@@ -32,8 +34,13 @@ public class Entity {
 		calculatePositionMatrix();
 	}*/
 	
+	private static int nextID = 0;
+	public static int getEntityID() {
+		return nextID++;
+	}
+	
 	public Entity(int textureMapIndex, int textureIndex, Vector2f position, Vector2f size, float rotation) {
-		super();
+		this.ID = getEntityID();
 		this.position = position;
 		this.size = size;
 		this.rotation = rotation;
@@ -136,5 +143,13 @@ public class Entity {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getEntityType() {
+		return entityType;
+	}
+	
+	public int getID() {
+		return ID;
 	}
 }

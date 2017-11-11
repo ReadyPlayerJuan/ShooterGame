@@ -14,8 +14,8 @@ public class Gun extends Weapon {
 	protected float fireTimer;
 	protected float speed, bulletSpeedVariation, damage, fireRate, fireAngleVariation, accuracy, pierce, kick, knockback, numBullets;
 	
-	public Gun(Entity owner, int bulletTextureIndex) {
-		super(owner);
+	public Gun(Entity owner, int bulletTextureIndex, boolean damagesPlayers, boolean damagesEnemies) {
+		super(owner, damagesPlayers, damagesEnemies);
 		this.bulletTextureIndex = bulletTextureIndex;
 		
 		speed = 300f;
@@ -31,27 +31,24 @@ public class Gun extends Weapon {
 		
 		
 		fireTimer = 1.0f / fireRate;
-		update();
+		update(false, 0);
 	}
 	
-	public void update() {
-		float delta = DisplayManager.getDelta();
-		
-		fireTimer += delta;
-		
-		float fireDelay = 1.0f / fireRate;
-		if(fireTimer > fireDelay)
-			fireTimer = fireDelay;
-	}
-
 	@Override
-	public void attack(float direction) {
+	public void update(boolean attacking, float direction) {
+		float delta = DisplayManager.getDelta();
+
 		float fireDelay = 1.0f / fireRate;
-		
-		while(fireTimer >= fireDelay) {
-			shoot(direction);
+		if(attacking) {
+			fireTimer += delta;
 			
-			fireTimer -= fireDelay;
+			if(fireTimer >= fireDelay) {
+				shoot(direction);
+				
+				fireTimer -= fireDelay;
+			}
+		} else {
+			fireTimer = fireDelay;
 		}
 	}
 	
@@ -60,7 +57,7 @@ public class Gun extends Weapon {
 			float angleVariation = (float)Math.pow(Math.random(), accuracy) * fireAngleVariation * (int)(((int)(Math.random() * 2) - 0.5) * 2);
 			float speedVariation = (float)Math.random() * bulletSpeedVariation * (int)(((int)(Math.random() * 2) - 0.5) * 2);
 			
-			EntityManager.addBullet(new Bullet(bulletTextureIndex, Vector2f.add(owner.getPosition(), positionOffset, null), direction + angleVariation, speed + speedVariation, damage));
+			EntityManager.addBullet(new Bullet(damagesPlayers, damagesEnemies, bulletTextureIndex, Vector2f.add(owner.getPosition(), positionOffset, null), direction + angleVariation, speed + speedVariation, damage));
 		}
 	}
 }

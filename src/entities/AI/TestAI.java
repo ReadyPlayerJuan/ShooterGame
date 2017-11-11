@@ -20,12 +20,14 @@ public class TestAI extends AI {
 		
 		int nearestPlayerIndex = -1;
 		float nearestPlayerDistance = 999f;
-		for(int i = 0; i < players.size(); i++) {
-			float distance = Vector2f.sub(players.get(i).getPosition(), owner.getPosition(), null).length();
-			
-			if(distance < nearestPlayerDistance) {
-				nearestPlayerIndex = i;
-				nearestPlayerDistance = distance;
+		if(players.size() > 0) {
+			for(int i = 0; i < players.size(); i++) {
+				float distance = Vector2f.sub(players.get(i).getPosition(), owner.getPosition(), null).length();
+				
+				if(distance < nearestPlayerDistance) {
+					nearestPlayerIndex = i;
+					nearestPlayerDistance = distance;
+				}
 			}
 		}
 		

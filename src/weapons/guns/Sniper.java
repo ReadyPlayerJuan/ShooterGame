@@ -3,9 +3,8 @@ package weapons.guns;
 import entities.Entity;
 
 public class Sniper extends Gun {
-
-	public Sniper(Entity owner) {
-		super(owner, 0);
+	public Sniper(Entity owner, boolean damagesPlayers, boolean damagesEnemies) {
+		super(owner, 0, damagesPlayers, damagesEnemies);
 		
 		speed = 500f;
 		bulletSpeedVariation = 10f;

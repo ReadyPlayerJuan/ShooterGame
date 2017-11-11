@@ -53,15 +53,9 @@ public class MainGameLoop {
 		while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			EntityManager.updateEntities();
 			EntityManager.moveEntities();
-			//ParticleMaster.update();
 			
-			//for(Entity e: testMap.getBackgroundEntities()) {
-				//e.changeRotation(-2f * DisplayManager.getFrameTimeSeconds());
-			//}
-			//masterRenderer.renderLayer(testMap, EntityRenderer.BACKGROUND);
-			//System.out.println(EntityManager.getDynamicEntities().size());
 			
-			//masterRenderer.render(camera);
+			//System.out.println(EntityManager.getBullets().size());
 			masterRenderer.renderScene(testMap, player);
 			
 			DisplayManager.updateDisplay();

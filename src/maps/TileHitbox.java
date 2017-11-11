@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
+
+import hitboxes.LineHitbox;
 import toolbox.Maths.Direction;
 
 public class TileHitbox {

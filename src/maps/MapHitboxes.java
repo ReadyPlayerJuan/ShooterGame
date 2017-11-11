@@ -2,6 +2,8 @@ package maps;
 
 import java.util.ArrayList;
 
+import hitboxes.LineHitbox;
+
 public class MapHitboxes {
 	private ArrayList<LineHitbox> hitboxesU, hitboxesR, hitboxesD, hitboxesL;
 	

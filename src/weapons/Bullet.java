@@ -2,92 +2,99 @@ package weapons;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import entities.Entity;
+import entities.EntityAnimation;
 import entities.EntityManager;
-import maps.LineHitbox;
-import maps.MapHitboxes;
+import entities.LivingEntity;
+import entities.AI.BulletAI;
 import renderEngine.DisplayManager;
 import textures.TextureManager;
 
-public class Bullet extends Entity {
-	private boolean alive = true;
-	
+public class Bullet extends LivingEntity {
+	private boolean damagesPlayers, damagesEnemies;
 	private float bulletSpeed, damage;
-	private Vector2f velocity;
 	
-	private final float HITBOX_RADIUS = 2;
-	
-	public Bullet(int bulletTextureIndex, Vector2f position, float direction, float speed, float damage) {
-		super(TextureManager.PROJECTILE_TEXTURE, bulletTextureIndex, position, new Vector2f(8, 8), direction - (3.14159f / 2));
-		name = "bullet";
+	public Bullet(boolean damagesPlayers, boolean damagesEnemies, int bulletTextureIndex, Vector2f position, float direction, float speed, float damage) {
+		super(position, new Vector2f(8, 8), direction - (3.14159f / 2));
+		this.entityType = "bullet";
+		
+		velocity = new Vector2f((float)Math.cos(direction) * speed, -(float)Math.sin(direction) * speed);
+		this.ai = new BulletAI(this, velocity);
+		this.health = 1;
+		
+		addAnimation(new EntityAnimation(TextureManager.PROJECTILE_TEXTURE, new int[] {bulletTextureIndex}));
 		setRotatePoint(0.5f, 0.5f);
 		setSpriteOffset(-4, 4);
 		
 		this.bulletSpeed = speed;
 		this.damage = damage;
+		this.canBePushed = false;
+		this.damagesPlayers = damagesPlayers;
+		this.damagesEnemies = damagesEnemies;
 		
-		velocity = new Vector2f((float)Math.cos(direction) * speed, -(float)Math.sin(direction) * speed);
+		hitboxRadius = 2;
+		maxVelocity = 999f;
+		acceleration = 0f;
+		decceleration = 0f;
+		friction = 0f;
 	}
 	
 	@Override
 	public void update() {
-		
+		super.update();
 	}
 	
 	@Override
 	public void move() {
-		float delta = DisplayManager.getDelta();
-		MapHitboxes hitboxes = EntityManager.getStaticHitboxes();
-		
-		Vector2f nextPosition = new Vector2f(position.x + (velocity.x * delta), position.y + (velocity.y * delta));
-		
-		if(velocity.x > 0) {
-			for(LineHitbox hitbox: hitboxes.getHitboxesL()) {
-				if(nextPosition.y + HITBOX_RADIUS > hitbox.getEndPoint1().y && nextPosition.y - HITBOX_RADIUS < hitbox.getEndPoint2().y &&
-						position.x + HITBOX_RADIUS <= hitbox.getCenterPosition().x && nextPosition.x + HITBOX_RADIUS > hitbox.getCenterPosition().x) {
-					nextPosition.setX(hitbox.getCenterPosition().x - HITBOX_RADIUS);
-					velocity = new Vector2f();
-					alive = false;
-				}
-			}
-		}
-		if(velocity.x < 0) {
-			for(LineHitbox hitbox: hitboxes.getHitboxesR()) {
-				if(nextPosition.y + HITBOX_RADIUS > hitbox.getEndPoint1().y && nextPosition.y - HITBOX_RADIUS < hitbox.getEndPoint2().y &&
-						position.x - HITBOX_RADIUS >= hitbox.getCenterPosition().x && nextPosition.x - HITBOX_RADIUS < hitbox.getCenterPosition().x) {
-					nextPosition.setX(hitbox.getCenterPosition().x + HITBOX_RADIUS);
-					velocity = new Vector2f();
-					alive = false;
-				}
-			}
-		}
-		if(velocity.y > 0) {
-			for(LineHitbox hitbox: hitboxes.getHitboxesU()) {
-				if(nextPosition.x + HITBOX_RADIUS > hitbox.getEndPoint1().x && nextPosition.x - HITBOX_RADIUS < hitbox.getEndPoint2().x &&
-						position.y + HITBOX_RADIUS <= hitbox.getCenterPosition().y && nextPosition.y + HITBOX_RADIUS > hitbox.getCenterPosition().y) {
-					nextPosition.setY(hitbox.getCenterPosition().y - HITBOX_RADIUS);
-					velocity = new Vector2f();
-					alive = false;
-				}
-			}
-		}
-		if(velocity.y < 0) {
-			for(LineHitbox hitbox: hitboxes.getHitboxesD()) {
-				if(nextPosition.x + HITBOX_RADIUS > hitbox.getEndPoint1().x && nextPosition.x - HITBOX_RADIUS < hitbox.getEndPoint2().x &&
-						position.y - HITBOX_RADIUS >= hitbox.getCenterPosition().y && nextPosition.y - HITBOX_RADIUS < hitbox.getCenterPosition().y) {
-					nextPosition.setY(hitbox.getCenterPosition().y + HITBOX_RADIUS);
-					velocity = new Vector2f();
-					alive = false;
-				}
-			}
-		}
-		
-		position = nextPosition;
-		calculatePositionMatrix();
+		super.move();
 	}
 	
-	public boolean isAlive() {
-		return alive;
+	@Override
+	protected void collideWithEntities() {
+		float delta = DisplayManager.getDelta();
+		
+		if(damagesEnemies) {
+			for(LivingEntity entity: EntityManager.getEnemies()) {
+				if(entity.getID() != this.getID()) {
+					Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
+					float distance = displacement.length() / (hitboxRadius + entity.getHitboxRadius());
+					
+					if(distance < 1 && displacement.length() > 0) {
+						displacement.normalise();
+						
+						//entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
+						
+						this.collidedWith(entity);
+						entity.collidedWith(this);
+					}
+				}
+			}
+		}
+		if(damagesPlayers) {
+			for(LivingEntity entity: EntityManager.getPlayers()) {
+				if(entity.getID() != this.getID()) {
+					Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
+					float distance = displacement.length() / (hitboxRadius + entity.getHitboxRadius());
+					
+					if(distance < 1 && displacement.length() > 0) {
+						displacement.normalise();
+						
+						//entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
+						
+						this.collidedWith(entity);
+						entity.collidedWith(this);
+					}
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void collidedWith(LivingEntity other) {
+		if(other == null) {
+			health = 0;
+		} else {
+			health = 0;
+		}
 	}
 	
 	public float getBulletSpeed() {
@@ -96,5 +103,13 @@ public class Bullet extends Entity {
 	
 	public float getDamage() {
 		return damage;
+	}
+	
+	public boolean damagesEnemies() {
+		return damagesEnemies;
+	}
+
+	public boolean damagesPlayers() {
+		return damagesPlayers;
 	}
 }

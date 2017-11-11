@@ -32,7 +32,7 @@ public class EntityRenderer {
 		shader = new EntityShader();
 	}
 	
-	public void renderLayer(int currentEntityLayer, Fbo fbo, Vector2f mapPosition) {
+	public void renderLayer(Map<Integer, List<Entity>> entities, Fbo fbo, Vector2f mapPosition) {
 		shader.start();
 		GL30.glBindVertexArray(quad.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
@@ -41,15 +41,13 @@ public class EntityRenderer {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
 		
-		List<Map<Integer, List<Entity>>> allEntities = EntityManager.getSortedEntities();
-		
-		for(Integer textureMapIndex: allEntities.get(currentEntityLayer).keySet()) {
+		for(Integer textureMapIndex: entities.keySet()) {
 			TextureMap textureMap = TextureManager.getTexture(textureMapIndex);
 			
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureMap.getTextureID());
 			
-			List<Entity> batch = allEntities.get(currentEntityLayer).get(textureMapIndex);
+			List<Entity> batch = entities.get(textureMapIndex);
 			for(Entity entity: batch) {
 				EntitySprite sprite = entity.getSprite();
 				

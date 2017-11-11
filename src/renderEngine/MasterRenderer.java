@@ -47,7 +47,7 @@ public class MasterRenderer {
 			
 			backgroundFbo.bindFrameBuffer();
 			//clearScreen();
-			entityRenderer.renderLayer(EntityManager.BACKGROUND, backgroundFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getBackgroundEntitiesSorted(), backgroundFbo, map.getPosition());
 			backgroundFbo.unbindFrameBuffer();
 			break;
 			
@@ -57,7 +57,9 @@ public class MasterRenderer {
 			entityFbo.bindFrameBuffer();
 			
 			clearScreen();
-			entityRenderer.renderLayer(EntityManager.DYNAMIC, entityFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getPlayersSorted(), entityFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getEnemiesSorted(), entityFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getBulletsSorted(), entityFbo, map.getPosition());
 			
 			entityFbo.unbindFrameBuffer();
 			break;
@@ -67,7 +69,7 @@ public class MasterRenderer {
 			
 			foregroundFbo.bindFrameBuffer();
 			//clearScreen();
-			entityRenderer.renderLayer(EntityManager.FOREGROUND, foregroundFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getForegroundEntitiesSorted(), foregroundFbo, map.getPosition());
 			foregroundFbo.unbindFrameBuffer();
 			break;
 		}
@@ -75,12 +77,14 @@ public class MasterRenderer {
 	
 	public void renderScene(GameMap map, Player player) {
 		//EntityManager.clearLayer(EntityManager.DYNAMIC);
-		//EntityManager.processEntities(map.getDynamicEntities(), EntityManager.DYNAMIC);
+		//EntityManager.processEntities(EntityManager.getDynamicEntities(), EntityManager.DYNAMIC);
 		//System.out.println(map.getDynamicEntities().size());
 		
 		renderLayer(map, EntityManager.DYNAMIC);
 		
 		clearScreen();
+		Camera camera = new Camera();
+		camera.setPosition(new Vector2f(DisplayManager.getTotalTime() * 100, 0));
 		terrainRenderer.render(map, player.getCamera());
 		
 		

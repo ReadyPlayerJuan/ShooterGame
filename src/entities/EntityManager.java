@@ -12,20 +12,22 @@ import maps.MapHitboxes;
 import weapons.Bullet;
 
 public class EntityManager {
-	private static final int NUM_ENTITY_LAYERS = 3;
 	public static final int BACKGROUND = 0;
 	public static final int DYNAMIC = 1;
 	public static final int FOREGROUND = 2;
 	
-	private static List<Map<Integer, List<Entity>>> sortedEntities = new ArrayList<Map<Integer, List<Entity>>>();
 	
-	private static List<Entity> backgroundEntities = new ArrayList<Entity>();
-	private static List<Entity> dynamicEntities = new ArrayList<Entity>();
-	private static List<Entity> foregroundEntities = new ArrayList<Entity>();
+	private static Map<Integer, List<Entity>> backgroundEntitiesSorted = new HashMap<Integer, List<Entity>>();
+	private static Map<Integer, List<Entity>> foregroundEntitiesSorted = new HashMap<Integer, List<Entity>>();
 	
-	private static List<Bullet> bullets = new ArrayList<Bullet>();
-	private static List<Enemy> enemies = new ArrayList<Enemy>();
 	private static List<Player> players = new ArrayList<Player>();
+	private static List<Enemy> enemies = new ArrayList<Enemy>();
+	private static List<Bullet> bullets = new ArrayList<Bullet>();
+	
+	private static List<Map<Integer, List<Entity>>> dynamicEntitiesSorted = new ArrayList<Map<Integer, List<Entity>>>();
+	private static Map<Integer, List<Entity>> playersSorted = new HashMap<Integer, List<Entity>>();
+	private static Map<Integer, List<Entity>> enemiesSorted = new HashMap<Integer, List<Entity>>();
+	private static Map<Integer, List<Entity>> bulletsSorted = new HashMap<Integer, List<Entity>>();
 	
 	private static List<Bullet> newBullets = new ArrayList<Bullet>();
 	
@@ -33,56 +35,75 @@ public class EntityManager {
 	private static MapHitboxes staticHitboxes;
 	
 	public static void initMap(GameMap map) {
-		backgroundEntities = new ArrayList<Entity>();
-		dynamicEntities = new ArrayList<Entity>();
-		foregroundEntities = new ArrayList<Entity>();
-		
-		backgroundEntities.addAll(map.getBackgroundEntities());
-		foregroundEntities.addAll(map.getForegroundEntities());
-		dynamicEntities.addAll(map.getDynamicEntities());
-
-		staticHitboxes = map.getHitboxes();
+		players = new ArrayList<Player>();
+		enemies = new ArrayList<Enemy>();
+		bullets = new ArrayList<Bullet>();
 		
 		
-		for(int i = 0; i < NUM_ENTITY_LAYERS; i++) {
-			sortedEntities.add(new HashMap<Integer, List<Entity>>());
+		backgroundEntitiesSorted = new HashMap<Integer, List<Entity>>();
+		foregroundEntitiesSorted = new HashMap<Integer, List<Entity>>();
+		dynamicEntitiesSorted = new ArrayList<Map<Integer, List<Entity>>>();
+		
+		
+		processEntities(map.getBackgroundEntities(), backgroundEntitiesSorted);
+		processEntities(map.getForegroundEntities(), foregroundEntitiesSorted);
+		
+		for(Enemy enemy: map.getEnemies()) {
+			processEntity(enemy, enemiesSorted);
+			enemies.add(enemy);
 		}
 		
-		processEntities(backgroundEntities, BACKGROUND);
-		processEntities(dynamicEntities, DYNAMIC);
-		processEntities(foregroundEntities, FOREGROUND);
+		dynamicEntitiesSorted = new ArrayList<Map<Integer, List<Entity>>>();
+		dynamicEntitiesSorted.add(playersSorted);
+		dynamicEntitiesSorted.add(enemiesSorted);
+		dynamicEntitiesSorted.add(bulletsSorted);
+		
+		
+		staticHitboxes = map.getHitboxes();
 	}
 	
 	public static void updateEntities() {
-		for(Entity entity: dynamicEntities) {
+		for(Entity entity: players) {
+			entity.update();
+		}
+		for(Entity entity: enemies) {
+			entity.update();
+		}
+		for(Entity entity: bullets) {
 			entity.update();
 		}
 		
-		for(Bullet entity: newBullets) {
-			dynamicEntities.add(entity);
-			bullets.add(entity);
-			
-			ArrayList<Entity> list = new ArrayList<Entity>();
-			list.add(entity);
-			processEntities(list, DYNAMIC);
+		for(Bullet bullet: newBullets) {
+			processEntity(bullet, bulletsSorted);
+			bullets.add(bullet);
 		}
 		newBullets = new ArrayList<Bullet>();
 		
-		for(int i = 0; i < dynamicEntities.size(); i++) {
-			if(dynamicEntities.get(i).getName().equals("bullet")) {
-				if(!((Bullet)dynamicEntities.get(i)).isAlive()) {
-					dynamicEntities.remove(i);
+
+		for(Integer textureMapIndex: bulletsSorted.keySet()) {
+			List<Entity> bulletSet = bulletsSorted.get(textureMapIndex);
+			for(int i = 0; i < bulletSet.size(); i++) {
+				if(!((Bullet)bulletSet.get(i)).isAlive()) {
+					bulletSet.remove(i);
 					i--;
 				}
 			}
 		}
-		//clearLayer(DYNAMIC);
-		//processEntities(dynamicEntities, DYNAMIC);
+		for(int i = 0; i < bullets.size(); i++) {
+			if(!((Bullet)bullets.get(i)).isAlive()) {
+				bullets.remove(i);
+				i--;
+			}
+		}
 	}
 	
 	public static void moveEntities() {
-		for(Entity entity: dynamicEntities) {
-			entity.move();
+		for(Map<Integer, List<Entity>> hashmap: dynamicEntitiesSorted) {
+			for(Integer textureMapIndex: hashmap.keySet()) {
+				for(Entity entity: hashmap.get(textureMapIndex)) {
+					entity.move();
+				}
+			}
 		}
 	}
 	
@@ -91,67 +112,81 @@ public class EntityManager {
 	}
 	
 	public static void addPlayer(Player player) {
+		processEntity(player, playersSorted);
 		players.add(player);
-		dynamicEntities.add(player);
-
-		ArrayList<Entity> list = new ArrayList<Entity>();
-		list.add(player);
-		processEntities(list, DYNAMIC);
 	}
 	
 	
-	public static void processEntities(List<Entity> entities, int currentEntityLayer) {
+	public static void processEntities(List<Entity> entities, Map<Integer, List<Entity>> hashmap) {
 		for(Entity entity: entities) {
 			int textureMapIndex = entity.getSprite().getTextureMapIndex();
-			List<Entity> batch = sortedEntities.get(currentEntityLayer).get(textureMapIndex);
+			List<Entity> batch = hashmap.get(textureMapIndex);
 			if(batch != null) {
 				batch.add(entity);
 			} else {
 				List<Entity> newBatch = new ArrayList<Entity>();
 				newBatch.add(entity);
-				sortedEntities.get(currentEntityLayer).put(textureMapIndex, newBatch);
+				hashmap.put(textureMapIndex, newBatch);
 			}
 		}
 	}
 	
-	public static void clearLayer(int currentEntityLayer) {
-		sortedEntities.get(currentEntityLayer).clear();
-	}
-	
-	public static void clearAllLayers() {
-		for(int i = 0; i < NUM_ENTITY_LAYERS; i++) {
-			clearLayer(i);
+	public static void processEntity(Entity entity, Map<Integer, List<Entity>> hashmap) {
+		int textureMapIndex = entity.getSprite().getTextureMapIndex();
+		List<Entity> batch = hashmap.get(textureMapIndex);
+		if(batch != null) {
+			batch.add(entity);
+		} else {
+			List<Entity> newBatch = new ArrayList<Entity>();
+			newBatch.add(entity);
+			hashmap.put(textureMapIndex, newBatch);
 		}
 	}
 	
-	public static List<Bullet> getBullets() {
-		return bullets;
+	public static Map<Integer, List<Entity>> getBackgroundEntitiesSorted() {
+		return backgroundEntitiesSorted;
+	}
+
+	public static Map<Integer, List<Entity>> getForegroundEntitiesSorted() {
+		return foregroundEntitiesSorted;
+	}
+
+	public static List<Map<Integer, List<Entity>>> getDynamicEntitiesSorted() {
+		return dynamicEntitiesSorted;
+	}
+
+	public static Map<Integer, List<Entity>> getPlayersSorted() {
+		return playersSorted;
+	}
+
+	public static Map<Integer, List<Entity>> getEnemiesSorted() {
+		return enemiesSorted;
+	}
+
+	public static Map<Integer, List<Entity>> getBulletsSorted() {
+		return bulletsSorted;
 	}
 	
-	public static List<Enemy> getEnemies() {
-		return enemies;
+	/*public static List<Entity> getBackgroundEntities() {
+		return backgroundEntities;
 	}
-	
+
+	public static List<Entity> getForegroundEntities() {
+		return foregroundEntities;
+	}*/
+
 	public static List<Player> getPlayers() {
 		return players;
 	}
-	
-	public static List<Map<Integer, List<Entity>>> getSortedEntities() {
-		return sortedEntities;
+
+	public static List<Enemy> getEnemies() {
+		return enemies;
 	}
-	
-	public static List<Entity> getBackgroundEntities() {
-		return backgroundEntities;
+
+	public static List<Bullet> getBullets() {
+		return bullets;
 	}
-	
-	public static List<Entity> getDynamicEntities() {
-		return dynamicEntities;
-	}
-	
-	public static List<Entity> getForegroundEntities() {
-		return foregroundEntities;
-	}
-	
+
 	public static MapHitboxes getStaticHitboxes() {
 		return staticHitboxes;
 	}

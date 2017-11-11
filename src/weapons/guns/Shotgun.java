@@ -3,9 +3,8 @@ package weapons.guns;
 import entities.Entity;
 
 public class Shotgun extends Gun {
-
-	public Shotgun(Entity owner) {
-		super(owner, 0);
+	public Shotgun(Entity owner, boolean damagesPlayers, boolean damagesEnemies) {
+		super(owner, 0, damagesPlayers, damagesEnemies);
 		
 		speed = 300f;
 		bulletSpeedVariation = 20f;
@@ -18,5 +17,4 @@ public class Shotgun extends Gun {
 		knockback = 0;
 		numBullets = 6;
 	}
-
 }
