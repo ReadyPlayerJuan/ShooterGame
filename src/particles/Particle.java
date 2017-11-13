@@ -1,6 +1,7 @@
 package particles;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector4f;
 
 import renderEngine.DisplayManager;
 
@@ -9,7 +10,8 @@ public class Particle {
 	private float size;
 	private float decceleration;
 	private float rotation;
-
+	
+	private Vector4f color;
 	private float lifeSpan;
 
 	public Particle(Vector2f position, Vector2f velocity, float decceleration, float size, float rotation, float lifeSpan) {
@@ -20,6 +22,8 @@ public class Particle {
 		this.rotation = rotation;
 		this.lifeSpan = lifeSpan;
 		
+		color = new Vector4f(1, 1, 1, 0.5f);//new Vector4f((float)Math.random(), (float)Math.random(), (float)Math.random(), 1);
+		
 		ParticleMaster.addParticle(this);
 	}
 
@@ -27,7 +31,7 @@ public class Particle {
 		float delta = DisplayManager.getDelta();
 		lifeSpan -= delta;
 		
-		Vector2f.add(position, (Vector2f)velocity.scale(delta), position);
+		Vector2f.add(position, (Vector2f)(new Vector2f(velocity)).scale(delta), position);
 		
 		if(velocity.length() != 0) {
 			Vector2f normal = (Vector2f)(new Vector2f(velocity)).normalise();
@@ -61,5 +65,9 @@ public class Particle {
 
 	public float getLifeSpan() {
 		return lifeSpan;
+	}
+
+	public Vector4f getColor() {
+		return color;
 	}
 }

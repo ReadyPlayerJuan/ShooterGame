@@ -2,6 +2,7 @@ package textures;
 
 import java.util.ArrayList;
 
+import loader.FileLoader;
 import loader.Loader;
 
 public class TextureManager {
@@ -15,7 +16,7 @@ public class TextureManager {
 		textures = new ArrayList<TextureMap>();
 
 		TextureMap missingTexture = new TextureMap(loader.loadTexture("missingTexture"), 16, 16);
-		TextureMap terrainTextureMap = new TextureMap(loader.loadHitboxes("tileset"), loader.loadTexture("tileset"), 205, 188, 1, 1, 12, 11);
+		TextureMap terrainTextureMap = new TextureMap(FileLoader.loadHitboxes("tileset"), loader.loadTexture("tileset"), 205, 188, 1, 1, 12, 11);
 		TextureMap projectilesTextureMap = new TextureMap(loader.loadTexture("projectiles"), 37, 37, 1, 1, 4, 4);
 		
 		textures.add(missingTexture);

@@ -2,9 +2,10 @@
 
 out vec4 out_colour;
 
+in vec4 pass_color;
 
 void main(void){
 
-	out_colour = vec4(1.0);
+	out_colour = pass_color;
 
 }

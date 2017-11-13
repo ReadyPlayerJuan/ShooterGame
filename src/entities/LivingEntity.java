@@ -60,6 +60,9 @@ public class LivingEntity extends AnimatedEntity {
 			if(velocity.length() != 0 && !pushed) {
 				Vector2f normal = (Vector2f)(new Vector2f(velocity)).normalise();
 				velocity = new Vector2f(velocity.x - (decceleration * normal.x * delta), velocity.y - (decceleration * normal.y * delta));
+				
+				if(velocity.x * Math.signum(normal.x) < 0) { velocity.x = 0; }
+				if(velocity.y * Math.signum(normal.y) < 0) { velocity.y = 0; }
 			}
 		}
 		

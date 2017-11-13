@@ -12,6 +12,8 @@ import entities.player.Player;
 import guis.GuiTexture;
 import loader.Loader;
 import maps.GameMap;
+import particles.ParticleMaster;
+import particles.ParticleRenderer;
 import postProcessing.Fbo;
 import postProcessing.PostProcessing;
 import renderEngine.entities.EntityRenderer;
@@ -22,6 +24,7 @@ public class MasterRenderer {
 	private EntityRenderer entityRenderer;
 	private GuiRenderer guiRenderer;
 	private TerrainRenderer terrainRenderer;
+	private ParticleRenderer particleRenderer;
 	
 	private List<GuiTexture> guis = new ArrayList<GuiTexture>();
 	private Fbo terrainFbo, mainFbo;
@@ -32,6 +35,7 @@ public class MasterRenderer {
 		entityRenderer = new EntityRenderer(loader);
 		guiRenderer = new GuiRenderer(loader);
 		terrainRenderer = new TerrainRenderer(loader);
+		particleRenderer = new ParticleRenderer(loader);
 		
 		terrainFbo = new Fbo((int)((float)Display.getWidth() / DisplayManager.PIXELLATE_AMOUNT), (int)((float)Display.getHeight() / DisplayManager.PIXELLATE_AMOUNT), Fbo.NONE, GL11.GL_NEAREST);
 		guis.add(new GuiTexture(terrainFbo.getColourTexture(), new Vector2f(0, 0), new Vector2f(1, 1)));
@@ -61,6 +65,10 @@ public class MasterRenderer {
 			entityRenderer.renderLayer(EntityManager.getEnemiesSorted(), entityFbo, map.getPosition());
 			entityRenderer.renderLayer(EntityManager.getBulletsSorted(), entityFbo, map.getPosition());
 			
+			GL11.glPointSize(1f);
+			ParticleMaster.update();
+			particleRenderer.render(ParticleMaster.getParticles(), entityFbo, map.getPosition());
+			
 			entityFbo.unbindFrameBuffer();
 			break;
 			
@@ -83,11 +91,7 @@ public class MasterRenderer {
 		renderLayer(map, EntityManager.DYNAMIC);
 		
 		clearScreen();
-		Camera camera = new Camera();
-		camera.setPosition(new Vector2f(DisplayManager.getTotalTime() * 100, 0));
 		terrainRenderer.render(map, player.getCamera());
-		
-		
 		
 		ArrayList<GuiTexture> guis = new ArrayList<GuiTexture>();
 		//guis.add(map.getBackgroundTexture());
@@ -106,6 +110,8 @@ public class MasterRenderer {
 	public void cleanUp() {
 		entityRenderer.cleanUp();
 		guiRenderer.cleanUp();
+		particleRenderer.cleanUp();
+		terrainRenderer.cleanUp();
 		terrainFbo.cleanUp();
 		mainFbo.cleanUp();
 	}

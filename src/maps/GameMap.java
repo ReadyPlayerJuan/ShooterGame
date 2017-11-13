@@ -11,6 +11,7 @@ import entities.enemies.Enemy;
 import entities.enemies.TestEnemy;
 import guis.GuiTexture;
 import hitboxes.LineHitbox;
+import loader.FileLoader;
 import loader.Loader;
 import postProcessing.Fbo;
 import textures.TextureManager;
@@ -42,8 +43,8 @@ public class GameMap {
 		foregroundEntities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
 		
-		backgroundMap = loader.loadMap(fileName + "_Background");
-		foregroundMap = loader.loadMap(fileName + "_Foreground");
+		backgroundMap = FileLoader.loadMap(fileName + "_Background");
+		foregroundMap = FileLoader.loadMap(fileName + "_Foreground");
 		
 		tileWidth = textureMap.getTextureWidthPx();
 		tileHeight = textureMap.getTextureHeightPx(); 

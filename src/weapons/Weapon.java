@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import org.lwjgl.util.vector.Vector2f;
 
 import entities.LivingEntity;
-import loader.Loader;
+import loader.FileLoader;
 
 public abstract class Weapon {
 	private static GunStats gunStats;
 	
-	public static void loadGunStats(Loader loader, String fileName) {
-		gunStats = loader.loadGunStats(fileName);
+	public static void loadGunStats(String fileName) {
+		gunStats = FileLoader.loadGunStats(fileName);
 	}
 	
 	public static ArrayList<Float> getStats(String gunName) {

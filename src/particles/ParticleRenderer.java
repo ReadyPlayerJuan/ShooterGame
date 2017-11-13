@@ -1,34 +1,62 @@
 package particles;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL33;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector4f;
 
 import loader.Loader;
-import renderEngine.Camera;
-import textures.RawModel;
-import toolbox.Maths;
+import postProcessing.Fbo;
 
 public class ParticleRenderer {
+	public static final int MAX_INSTANCES = 100000;
+	private static final int INSTANCE_DATA_LENGTH = 6;
 	
-	private static final float[] VERTICES = {0, 0};
+	private static final FloatBuffer buffer = BufferUtils.createFloatBuffer(MAX_INSTANCES * INSTANCE_DATA_LENGTH);
 	
-	private RawModel point;
+	private Loader loader;
+	
+	private int pointer = 0;
+	private int vao, vbo;
 	private ParticleShader shader;
 	
-	protected ParticleRenderer(Loader loader, Matrix4f projectionMatrix){
-		point = loader.loadToVAO(VERTICES, 2);
+	public ParticleRenderer(Loader loader){
+		this.loader = loader;
+		
+		vao = loader.loadVAO();
+		vbo = loader.createEmptyVbo(MAX_INSTANCES * INSTANCE_DATA_LENGTH);
+		System.out.println(vao);
+		loader.addAttribute(vao, vbo, 0, 2, INSTANCE_DATA_LENGTH, 0);
+		loader.addAttribute(vao, vbo, 1, 4, INSTANCE_DATA_LENGTH, 8);
+		
 		shader = new ParticleShader();
-		shader.start();
-		shader.loadProjectionMatrix(projectionMatrix);
-		shader.stop();
 	}
 	
-	protected void render(List<Particle> particles, Camera camera){
+	public void render(List<Particle> particles, Fbo fbo, Vector2f mapPosition){
+		prepare();
+		
+		pointer = 0;
+		float[] vboData = new float[particles.size() * INSTANCE_DATA_LENGTH];
+		
+		for(Particle particle: particles) {
+			Vector2f position = new Vector2f(particle.getPosition().x - mapPosition.x, particle.getPosition().y - mapPosition.y);
+			position = new Vector2f(position.x * 2 / fbo.getWidth(), position.y * 2 / fbo.getHeight());
+			
+			storeParticleData(position, particle.getColor(), vboData);
+		}
+		loader.updateVbo(vbo, vboData, buffer);
+		GL31.glDrawArraysInstanced(GL11.GL_POINTS, 0, 1, particles.size());
+		
+		
+		finishRendering();
 		/*Matrix4f viewMatrix = Maths.createViewMatrix(camera);
 		prepare();
 		for(Particle particle: particles) {
@@ -38,41 +66,32 @@ public class ParticleRenderer {
 		finishRendering();*/
 	}
 	
-	private void updateModelViewMatrix(Vector3f position, float rotation, float scale, Matrix4f viewMatrix) {
-		Matrix4f modelMatrix = new Matrix4f();
-		Matrix4f.translate(position, modelMatrix, modelMatrix);
-		modelMatrix.m00 = viewMatrix.m00;
-		modelMatrix.m01 = viewMatrix.m10;
-		modelMatrix.m02 = viewMatrix.m20;
-		modelMatrix.m10 = viewMatrix.m01;
-		modelMatrix.m11 = viewMatrix.m11;
-		modelMatrix.m12 = viewMatrix.m21;
-		modelMatrix.m20 = viewMatrix.m02;
-		modelMatrix.m21 = viewMatrix.m12;
-		modelMatrix.m22 = viewMatrix.m22;
-		Matrix4f.rotate((float)Math.toRadians(rotation), new Vector3f(0, 0, 1), modelMatrix, modelMatrix);
-		Matrix4f.scale(new Vector3f(scale, scale, scale), modelMatrix, modelMatrix);
-		Matrix4f modelViewMatrix = Matrix4f.mul(viewMatrix, modelMatrix, null);
-		shader.loadModelViewMatrix(modelViewMatrix);
+	private void storeParticleData(Vector2f position, Vector4f color, float[] data) {
+		data[pointer++] = position.x;
+		data[pointer++] = position.y;
+		data[pointer++] = color.x;
+		data[pointer++] = color.y;
+		data[pointer++] = color.z;
+		data[pointer++] = color.w;
 	}
-
-	protected void cleanUp(){
+	
+	public void cleanUp(){
 		shader.cleanUp();
 	}
 	
 	private void prepare(){
 		shader.start();
-		GL30.glBindVertexArray(point.getVaoID());
+		GL30.glBindVertexArray(vao);
 		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDepthMask(false);
 	}
 	
 	private void finishRendering(){
-		GL11.glDepthMask(true);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
 		GL30.glBindVertexArray(0);
 		shader.stop();
 	}
