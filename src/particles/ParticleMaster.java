@@ -9,9 +9,9 @@ import org.lwjgl.util.vector.Matrix4f;
 import loader.Loader;
 import renderEngine.Camera;
 
-/*public class ParticleMaster {
+public class ParticleMaster {
 	private static List<Particle> particles = new ArrayList<Particle>();
-	private static ParticleRenderer renderer;
+	//private static ParticleRenderer renderer;
 	
 	public static void init(Loader loader, Matrix4f projectionMatrix) {
 		//renderer = new ParticleRenderer(loader, projectionMatrix);
@@ -21,8 +21,8 @@ import renderEngine.Camera;
 		Iterator<Particle> iterator = particles.iterator();
 		while(iterator.hasNext()) {
 			Particle p = iterator.next();
-			boolean stillAlive = p.update();
-			if(!stillAlive) {
+			p.update();
+			if(!p.isAlive()) {
 				iterator.remove();
 			}
 		}
@@ -39,4 +39,4 @@ import renderEngine.Camera;
 	public static void addParticle(Particle particle) {
 		particles.add(particle);
 	}
-}*/
+}

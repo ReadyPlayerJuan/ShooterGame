@@ -13,15 +13,15 @@ import renderEngine.Camera;
 import textures.RawModel;
 import toolbox.Maths;
 
-/*public class ParticleRenderer {
+public class ParticleRenderer {
 	
-	private static final float[] VERTICES = {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+	private static final float[] VERTICES = {0, 0};
 	
-	private RawModel quad;
+	private RawModel point;
 	private ParticleShader shader;
 	
 	protected ParticleRenderer(Loader loader, Matrix4f projectionMatrix){
-		quad = loader.loadToVAO(VERTICES, 2);
+		point = loader.loadToVAO(VERTICES, 2);
 		shader = new ParticleShader();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
@@ -35,7 +35,7 @@ import toolbox.Maths;
 			updateModelViewMatrix(particle.getPosition(), particle.getRotation(), particle.getScale(), viewMatrix);
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
 		}
-		finishRendering();*//*
+		finishRendering();*/
 	}
 	
 	private void updateModelViewMatrix(Vector3f position, float rotation, float scale, Matrix4f viewMatrix) {
@@ -62,7 +62,7 @@ import toolbox.Maths;
 	
 	private void prepare(){
 		shader.start();
-		GL30.glBindVertexArray(quad.getVaoID());
+		GL30.glBindVertexArray(point.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -76,5 +76,4 @@ import toolbox.Maths;
 		GL30.glBindVertexArray(0);
 		shader.stop();
 	}
-
-}*/
+}

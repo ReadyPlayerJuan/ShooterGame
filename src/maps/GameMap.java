@@ -73,6 +73,8 @@ public class GameMap {
 		}
 		
 		enemies.add(new TestEnemy(new Vector2f(600, 600)));
+		enemies.add(new TestEnemy(new Vector2f(500, 600)));
+		enemies.add(new TestEnemy(new Vector2f(450, 600)));
 		
 		backgroundFbo = new Fbo(width, height, Fbo.NONE, GL11.GL_NEAREST);
 		entityFbo = new Fbo(width*1, height*1, Fbo.NONE, GL11.GL_NEAREST);

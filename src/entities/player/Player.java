@@ -6,6 +6,7 @@ import entities.EntityAnimation;
 import entities.LivingEntity;
 import renderEngine.Camera;
 import textures.TextureManager;
+import weapons.Bullet;
 import weapons.guns.*;
 
 public class Player extends LivingEntity {
@@ -18,7 +19,7 @@ public class Player extends LivingEntity {
 		addAnimation(new EntityAnimation(TextureManager.TERRAIN_TEXTURE, new int[] {90}));
 		
 		ai = new PlayerController(this);
-		weapon = new MachineGun(this, false, true);
+		weapon = new Revolver(this, false, true);
 		weapon.setOffset(new Vector2f());
 		
 		spriteOffset = new Vector2f(-8, 8);
@@ -29,7 +30,7 @@ public class Player extends LivingEntity {
 		maxVelocity = 150f;
 		acceleration = 1500f;
 		decceleration = 500f;
-		friction = 200f;
+		friction = 3.0f;
 	}
 	
 	@Override
@@ -52,7 +53,7 @@ public class Player extends LivingEntity {
 	public void collidedWith(LivingEntity other) {
 		if(other != null) {
 			if(other.getEntityType() == "bullet") {
-				//take damages
+				takeDamage((Bullet)other);
 			}
 		}
 	}

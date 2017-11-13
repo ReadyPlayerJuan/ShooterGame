@@ -27,6 +27,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import maps.TileHitbox;
 import textures.RawModel;
+import weapons.GunStats;
 
 public class Loader {
 	private List<Integer> vaos = new ArrayList<Integer>();
@@ -34,6 +35,57 @@ public class Loader {
 	private List<Integer> textures = new ArrayList<Integer>();
 	
 	private int filterMode = GL11.GL_LINEAR;
+	
+	public GunStats loadGunStats(String fileName) {
+		ArrayList<ArrayList<Float>> minStats = new ArrayList<ArrayList<Float>>();
+		ArrayList<ArrayList<Float>> maxStats = new ArrayList<ArrayList<Float>>();
+		ArrayList<String> names = new ArrayList<String>();
+		
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("guns/" + fileName + ".txt"));
+			
+			ArrayList<Float> currentGunStats;
+			String currentGunName;
+			
+			String line = "";
+			while((line = reader.readLine()) != null) {
+				if(line.length() > 5 && line.substring(0, 5).equals("name:")) {
+					currentGunName = line.substring(6);
+					currentGunStats = new ArrayList<Float>();
+					
+					while((line = reader.readLine()) != null) {
+						if(line.equals("")) {
+							break;
+						} else if(line.charAt(0) == '-') {
+							
+						} else {
+							int index = 0;
+							while(line.charAt(index) != '=') {
+								index++;
+							}
+							currentGunStats.add(Float.parseFloat(line.substring(index + 2)));
+						}
+					}
+					
+					minStats.add(currentGunStats);
+					names.add(currentGunName);
+				}
+			}
+			
+			
+			reader.close();
+		} catch(FileNotFoundException ex) {
+            System.out.println("Unable to open file '" + fileName + "'");
+            ex.printStackTrace();
+        } catch(IOException ex) {
+            System.out.println("Error reading file '" + fileName + "'");
+            ex.printStackTrace();
+        }
+		
+		
+		return new GunStats(minStats, maxStats, names);
+	}
 	
 	public ArrayList<ArrayList<TileHitbox>> loadHitboxes(String fileName) {
 		ArrayList<ArrayList<TileHitbox>> hitboxes = new ArrayList<ArrayList<TileHitbox>>();

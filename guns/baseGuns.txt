@@ -1,0 +1,71 @@
+name: pistol
+------------------
+bulletSpeed = 300
+bulletSpeedVariation = 20
+damage = 12
+fireRate = 2.2
+spread = 15
+accuracy = 3.0
+pierce = 0
+bounce = 0
+kick = 0
+knockback = 50
+numBullets = 1
+
+name: shotgun
+------------------
+bulletSpeed = 300
+bulletSpeedVariation = 20
+damage = 8
+fireRate = 1.1
+spread = 20
+accuracy = 1.5
+pierce = 0
+bounce = 0
+kick = 80
+knockback = 50
+numBullets = 6
+
+name: sniper
+------------------
+bulletSpeed = 500
+bulletSpeedVariation = 10
+damage = 35
+fireRate = 0.9
+spread = 7.5
+accuracy = 6.0
+pierce = 0
+bounce = 0
+kick = 0
+knockback = 0
+numBullets = 1
+
+name: machinegun
+------------------
+bulletSpeed = 350
+bulletSpeedVariation = 20
+damage = 6
+fireRate = 16
+spread = 20
+accuracy = 2.0
+pierce = 0
+bounce = 0
+kick = 35
+knockback = 0
+numBullets = 1
+
+name: revolver
+------------------
+bulletSpeed = 420
+bulletSpeedVariation = 20
+damage = 16
+fireRate = 12.0
+spread = 12
+accuracy = 4.0
+pierce = 0
+bounce = 0
+kick = 0
+knockback = 0
+numBullets = 1
+maxClipSize = 6
+clipReloadTime = 0.8

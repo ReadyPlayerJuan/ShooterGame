@@ -1,66 +1,65 @@
 package particles;
 
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector2f;
 
 import renderEngine.DisplayManager;
 
-/*public class Particle {
-	private Vector3f position;
-	private Vector3f velocity;
-	private float gravityEffect;
-	private float lifeLength;
+public class Particle {
+	private Vector2f position, velocity;
+	private float size;
+	private float decceleration;
 	private float rotation;
-	private float scale;
-	
-	private float elapsedTime = 0;
 
-	public Particle(Vector3f position, Vector3f velocity, float gravityEffect, float lifeLength, float rotation,
-			float scale) {
-		super();
+	private float lifeSpan;
+
+	public Particle(Vector2f position, Vector2f velocity, float decceleration, float size, float rotation, float lifeSpan) {
 		this.position = position;
 		this.velocity = velocity;
-		this.gravityEffect = gravityEffect;
-		this.lifeLength = lifeLength;
+		this.decceleration = decceleration;
+		this.size = size;
 		this.rotation = rotation;
-		this.scale = scale;
+		this.lifeSpan = lifeSpan;
 		
 		ParticleMaster.addParticle(this);
 	}
-	
-	protected boolean update() {
-		velocity.y += 0 * gravityEffect * DisplayManager.getFrameTimeSeconds();
-		Vector3f change = new Vector3f(velocity);
-		change.scale(DisplayManager.getFrameTimeSeconds());
-		Vector3f.add(change, position, position);
-		elapsedTime += DisplayManager.getFrameTimeSeconds();
-		return elapsedTime < lifeLength;
-	}
 
-	protected Vector3f getPosition() {
+	public void update() {
+		float delta = DisplayManager.getDelta();
+		lifeSpan -= delta;
+		
+		Vector2f.add(position, (Vector2f)velocity.scale(delta), position);
+		
+		if(velocity.length() != 0) {
+			Vector2f normal = (Vector2f)(new Vector2f(velocity)).normalise();
+			velocity = new Vector2f(velocity.x - (decceleration * normal.x * delta), velocity.y - (decceleration * normal.y * delta));
+		}
+	}
+	
+	public boolean isAlive() {
+		return lifeSpan > 0;
+	}
+	
+	public Vector2f getPosition() {
 		return position;
 	}
 
-	protected Vector3f getVelocity() {
+	public Vector2f getVelocity() {
 		return velocity;
 	}
 
-	protected float getGravityEffect() {
-		return gravityEffect;
+	public float getSize() {
+		return size;
 	}
 
-	protected float getLifeLength() {
-		return lifeLength;
+	public float getDecceleration() {
+		return decceleration;
 	}
 
-	protected float getRotation() {
+	public float getRotation() {
 		return rotation;
 	}
 
-	protected float getScale() {
-		return scale;
+	public float getLifeSpan() {
+		return lifeSpan;
 	}
-
-	protected float getElapsedTime() {
-		return elapsedTime;
-	}
-}*/
+}

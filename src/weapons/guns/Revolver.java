@@ -1,6 +1,6 @@
 package weapons.guns;
 
-import entities.Entity;
+import entities.LivingEntity;
 import renderEngine.DisplayManager;
 
 public class Revolver extends Gun {
@@ -8,23 +8,12 @@ public class Revolver extends Gun {
 	float clipReloadTime, clipReloadTimer;
 	boolean prevAttacked;
 	
-	public Revolver(Entity owner, boolean damagesPlayers, boolean damagesEnemies) {
-		super(owner, 0, damagesPlayers, damagesEnemies);
+	public Revolver(LivingEntity owner, boolean damagesPlayers, boolean damagesEnemies) {
+		super(owner, "revolver", 0, damagesPlayers, damagesEnemies);
 		
-		speed = 350f;
-		bulletSpeedVariation = 20f;
-		damage = 1f;
-		fireRate = 12.0f;
-		fireAngleVariation = (3.14159f / 16);
-		accuracy = 4.0f;
-		pierce = 0;
-		kick = 0;
-		knockback = 0;
-		numBullets = 1;
-		
-		maxClipSize = 6;
+		maxClipSize = (int)(float)stats.get(11);
+		clipReloadTime = stats.get(12);
 		clipSize = maxClipSize;
-		clipReloadTime = 0.8f;
 	}
 	
 	@Override

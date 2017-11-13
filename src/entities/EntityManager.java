@@ -73,13 +73,18 @@ public class EntityManager {
 			entity.update();
 		}
 		
+		
 		for(Bullet bullet: newBullets) {
 			processEntity(bullet, bulletsSorted);
 			bullets.add(bullet);
 		}
 		newBullets = new ArrayList<Bullet>();
 		
-
+		
+		removeDeadEntities();
+	}
+	
+	private static void removeDeadEntities() {
 		for(Integer textureMapIndex: bulletsSorted.keySet()) {
 			List<Entity> bulletSet = bulletsSorted.get(textureMapIndex);
 			for(int i = 0; i < bulletSet.size(); i++) {
@@ -92,6 +97,22 @@ public class EntityManager {
 		for(int i = 0; i < bullets.size(); i++) {
 			if(!((Bullet)bullets.get(i)).isAlive()) {
 				bullets.remove(i);
+				i--;
+			}
+		}
+
+		for(Integer textureMapIndex: enemiesSorted.keySet()) {
+			List<Entity> enemySet = enemiesSorted.get(textureMapIndex);
+			for(int i = 0; i < enemySet.size(); i++) {
+				if(!((Enemy)enemySet.get(i)).isAlive()) {
+					enemySet.remove(i);
+					i--;
+				}
+			}
+		}
+		for(int i = 0; i < enemies.size(); i++) {
+			if(!((Enemy)enemies.get(i)).isAlive()) {
+				enemies.remove(i);
 				i--;
 			}
 		}

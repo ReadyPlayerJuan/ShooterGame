@@ -1,19 +1,26 @@
 package weapons;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.util.vector.Vector2f;
 
 import entities.EntityAnimation;
 import entities.EntityManager;
 import entities.LivingEntity;
 import entities.AI.BulletAI;
-import renderEngine.DisplayManager;
+import hitboxes.LineHitbox;
+import maps.MapHitboxes;
 import textures.TextureManager;
 
 public class Bullet extends LivingEntity {
 	private boolean damagesPlayers, damagesEnemies;
-	private float bulletSpeed, damage;
+	private float bulletSpeed, damage, knockback;
+	private int pierce, bounce;
 	
-	public Bullet(boolean damagesPlayers, boolean damagesEnemies, int bulletTextureIndex, Vector2f position, float direction, float speed, float damage) {
+	private List<Integer> entitiesHit = new ArrayList<Integer>();
+	
+	public Bullet(boolean damagesPlayers, boolean damagesEnemies, int bulletTextureIndex, Vector2f position, float direction, float speed, float damage, float knockback, float pierce, float bounce) {
 		super(position, new Vector2f(8, 8), direction - (3.14159f / 2));
 		this.entityType = "bullet";
 		
@@ -27,6 +34,9 @@ public class Bullet extends LivingEntity {
 		
 		this.bulletSpeed = speed;
 		this.damage = damage;
+		this.knockback = knockback;
+		this.pierce = (int)pierce;
+		this.bounce = (int)bounce;
 		this.canBePushed = false;
 		this.damagesPlayers = damagesPlayers;
 		this.damagesEnemies = damagesEnemies;
@@ -49,22 +59,80 @@ public class Bullet extends LivingEntity {
 	}
 	
 	@Override
-	protected void collideWithEntities() {
-		float delta = DisplayManager.getDelta();
+	protected void collideWithTerrain() {
+		MapHitboxes hitboxes = EntityManager.getStaticHitboxes();
 		
+		if(velocity.x > 0) {
+			for(LineHitbox hitbox: hitboxes.getHitboxesL()) {
+				if(nextPosition.y + hitboxRadius > hitbox.getEndPoint1().y && nextPosition.y - hitboxRadius < hitbox.getEndPoint2().y &&
+						position.x + hitboxRadius <= hitbox.getCenterPosition().x && nextPosition.x + hitboxRadius > hitbox.getCenterPosition().x) {
+					nextPosition.setX(hitbox.getCenterPosition().x - hitboxRadius);
+					
+					rotation = -rotation;
+					velocity.x *= -1;
+					this.collidedWith(null);
+				}
+			}
+		}
+		if(velocity.x < 0) {
+			for(LineHitbox hitbox: hitboxes.getHitboxesR()) {
+				if(nextPosition.y + hitboxRadius > hitbox.getEndPoint1().y && nextPosition.y - hitboxRadius < hitbox.getEndPoint2().y &&
+						position.x - hitboxRadius >= hitbox.getCenterPosition().x && nextPosition.x - hitboxRadius < hitbox.getCenterPosition().x) {
+					nextPosition.setX(hitbox.getCenterPosition().x + hitboxRadius);
+					
+					rotation = -rotation;
+					velocity.x *= -1;
+					this.collidedWith(null);
+				}
+			}
+		}
+		if(velocity.y > 0) {
+			for(LineHitbox hitbox: hitboxes.getHitboxesU()) {
+				if(nextPosition.x + hitboxRadius > hitbox.getEndPoint1().x && nextPosition.x - hitboxRadius < hitbox.getEndPoint2().x &&
+						position.y + hitboxRadius <= hitbox.getCenterPosition().y && nextPosition.y + hitboxRadius > hitbox.getCenterPosition().y) {
+					nextPosition.setY(hitbox.getCenterPosition().y - hitboxRadius);
+					
+					rotation = 3.14159f - rotation;
+					velocity.y *= -1;
+					this.collidedWith(null);
+				}
+			}
+		}
+		if(velocity.y < 0) {
+			for(LineHitbox hitbox: hitboxes.getHitboxesD()) {
+				if(nextPosition.x + hitboxRadius > hitbox.getEndPoint1().x && nextPosition.x - hitboxRadius < hitbox.getEndPoint2().x &&
+						position.y - hitboxRadius >= hitbox.getCenterPosition().y && nextPosition.y - hitboxRadius < hitbox.getCenterPosition().y) {
+					nextPosition.setY(hitbox.getCenterPosition().y + hitboxRadius);
+					
+					rotation = 3.14159f - rotation;
+					velocity.y *= -1;
+					this.collidedWith(null);
+				}
+			}
+		}
+	}
+	
+	@Override
+	protected void collideWithEntities() {
 		if(damagesEnemies) {
 			for(LivingEntity entity: EntityManager.getEnemies()) {
 				if(entity.getID() != this.getID()) {
 					Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
 					float distance = displacement.length() / (hitboxRadius + entity.getHitboxRadius());
 					
-					if(distance < 1 && displacement.length() > 0) {
-						displacement.normalise();
+					if(distance < 1) {
+						boolean alreadyHit = false;
+						for(Integer i: entitiesHit) {
+							if(entity.getID() == i)
+								alreadyHit = true;
+						}
 						
-						//entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-						
-						this.collidedWith(entity);
-						entity.collidedWith(this);
+						if(!alreadyHit) {
+							entitiesHit.add(entity.getID());
+							
+							this.collidedWith(entity);
+							entity.collidedWith(this);
+						}
 					}
 				}
 			}
@@ -75,13 +143,19 @@ public class Bullet extends LivingEntity {
 					Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
 					float distance = displacement.length() / (hitboxRadius + entity.getHitboxRadius());
 					
-					if(distance < 1 && displacement.length() > 0) {
-						displacement.normalise();
+					if(distance < 1) {
+						boolean alreadyHit = false;
+						for(Integer i: entitiesHit) {
+							if(entity.getID() == i)
+								alreadyHit = true;
+						}
 						
-						//entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-						
-						this.collidedWith(entity);
-						entity.collidedWith(this);
+						if(!alreadyHit) {
+							entitiesHit.add(entity.getID());
+							
+							this.collidedWith(entity);
+							entity.collidedWith(this);
+						}
 					}
 				}
 			}
@@ -91,9 +165,40 @@ public class Bullet extends LivingEntity {
 	@Override
 	public void collidedWith(LivingEntity other) {
 		if(other == null) {
-			health = 0;
+			bounce--;
+			entitiesHit = new ArrayList<Integer>();
+			
+			if(bounce < 0)
+				health = 0;
 		} else {
-			health = 0;
+			pierce--;
+			if(pierce < 0) {
+				bounce--;
+				entitiesHit = new ArrayList<Integer>();
+				
+				if(bounce < 0) {
+					health = 0;
+				} else {
+					Vector2f toEntity = Vector2f.sub(position, other.getPosition(), null);
+					float angleToEntity = (float)Math.atan2(toEntity.y, toEntity.x);
+					if(angleToEntity < 0)
+						angleToEntity += 3.14159f * 2;
+					
+					if((angleToEntity > 3.14159f / 4 && angleToEntity < 3.14159f * 3 / 4) || (angleToEntity > 3.14159f * 5 / 4 && angleToEntity < 3.14159f * 7 / 4)) {
+						velocity.y *= -1;
+						rotation = 3.14159f - rotation;
+					} else {
+						velocity.x *= -1;
+						rotation = -rotation;
+					}
+					
+					toEntity.normalise();
+					position = Vector2f.add(other.getPosition(), (Vector2f)toEntity.scale(other.getHitboxRadius() + hitboxRadius + 0.01f), null);
+				}
+			}
+			
+			Vector2f unitVector = (Vector2f)(new Vector2f(velocity)).normalise();
+			other.push((Vector2f)unitVector.scale(knockback));
 		}
 	}
 	
@@ -103,6 +208,10 @@ public class Bullet extends LivingEntity {
 	
 	public float getDamage() {
 		return damage;
+	}
+	
+	public float getKnockback() {
+		return knockback;
 	}
 	
 	public boolean damagesEnemies() {

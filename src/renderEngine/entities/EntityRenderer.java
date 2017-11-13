@@ -12,7 +12,6 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Entity;
-import entities.EntityManager;
 import entities.EntitySprite;
 import loader.Loader;
 import postProcessing.Fbo;
@@ -23,7 +22,6 @@ import textures.TextureMap;
 public class EntityRenderer {
 	private final RawModel quad;
 	private EntityShader shader;
-	
 	
 	public EntityRenderer(Loader loader) {
 		float[] positions = {0, 1, 0, 0, 1, 1, 1, 0};

@@ -1,20 +1,9 @@
 package weapons.guns;
 
-import entities.Entity;
+import entities.LivingEntity;
 
 public class Sniper extends Gun {
-	public Sniper(Entity owner, boolean damagesPlayers, boolean damagesEnemies) {
-		super(owner, 0, damagesPlayers, damagesEnemies);
-		
-		speed = 500f;
-		bulletSpeedVariation = 10f;
-		damage = 1f;
-		fireRate = 0.9f;
-		fireAngleVariation = (3.14159f / 24);
-		accuracy = 6.0f;
-		pierce = 0;
-		kick = 0;
-		knockback = 0;
-		numBullets = 1;
+	public Sniper(LivingEntity owner, boolean damagesPlayers, boolean damagesEnemies) {
+		super(owner, "sniper", 0, damagesPlayers, damagesEnemies);
 	}
 }

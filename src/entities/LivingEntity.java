@@ -7,6 +7,7 @@ import entities.AI.TestAI;
 import hitboxes.LineHitbox;
 import maps.MapHitboxes;
 import renderEngine.DisplayManager;
+import weapons.Bullet;
 import weapons.Weapon;
 
 public class LivingEntity extends AnimatedEntity {
@@ -23,10 +24,9 @@ public class LivingEntity extends AnimatedEntity {
 	protected float maxVelocity = 150f;
 	protected float acceleration = 1500f;
 	protected float decceleration = 750f;
-	protected float friction = 250f;
+	protected float friction = 200f;
 	
-	protected final static float SOFT_COLLISION_PUSH_FACTOR = 0.5f;
-	private final boolean LIMIT_VELOCITY_DIAGONAL = false;
+	protected final static float SOFT_COLLISION_PUSH_FACTOR = 0.12f + (0.00180952381f * (DisplayManager.FPS_CAP - 30));
 	
 	public LivingEntity(Vector2f position, Vector2f size, float rotation) {
 		super(position, size, rotation);
@@ -36,7 +36,6 @@ public class LivingEntity extends AnimatedEntity {
 		velocity = new Vector2f();
 	}
 	
-	@SuppressWarnings("unused")
 	@Override
 	public void update() {
 		float delta = DisplayManager.getDelta();
@@ -52,8 +51,11 @@ public class LivingEntity extends AnimatedEntity {
 		
 		Vector2f movementDirection = ai.getMovementDirection();
 		if(movementDirection.length() > 0.1f) {
-			velocity.x += acceleration * delta * movementDirection.x;
-			velocity.y += acceleration * delta * movementDirection.y;
+			float movementModifierX = (float)Math.pow(Math.min(1, Math.max(0, 1 - (velocity.x / (maxVelocity * Math.signum(movementDirection.x + 0.001f))))), 0.5);
+			float movementModifierY = (float)Math.pow(Math.min(1, Math.max(0, 1 - (velocity.y / (maxVelocity * Math.signum(movementDirection.y + 0.001f))))), 0.5);
+			
+			velocity.x += acceleration * movementModifierX * delta * movementDirection.x;
+			velocity.y += acceleration * movementModifierY * delta * movementDirection.y;
 		} else {
 			if(velocity.length() != 0 && !pushed) {
 				Vector2f normal = (Vector2f)(new Vector2f(velocity)).normalise();
@@ -63,13 +65,10 @@ public class LivingEntity extends AnimatedEntity {
 		
 		if(velocity.length() != 0) {
 			Vector2f normal = (Vector2f)(new Vector2f(velocity)).normalise();
-			velocity = new Vector2f(velocity.x - (friction * normal.x * delta), velocity.y - (friction * normal.y * delta));
+			velocity = new Vector2f(velocity.x - (friction * velocity.x * delta), velocity.y - (friction * velocity.y * delta));
 			
 			if(Math.signum(velocity.x / normal.x) == -1 || Math.signum(velocity.y / normal.y) == -1) {
 				velocity = new Vector2f();
-			}
-			if((LIMIT_VELOCITY_DIAGONAL && velocity.length() > maxVelocity) || (!LIMIT_VELOCITY_DIAGONAL && Math.max(Math.abs(velocity.x), Math.abs(velocity.y)) > maxVelocity)) {
-				velocity = (Vector2f)velocity.normalise(null).scale(maxVelocity);
 			}
 		}
 	}
@@ -131,38 +130,44 @@ public class LivingEntity extends AnimatedEntity {
 	}
 	
 	protected void collideWithEntities() {
-		float delta = DisplayManager.getDelta();
-		
 		for(LivingEntity entity: EntityManager.getEnemies()) {
-			if(entity.getID() != this.getID() && entity.canBePushed()) {
-				Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
-				float distance = displacement.length() / (hitboxRadius + entity.hitboxRadius);
-				
-				if(distance < 1 && displacement.length() > 0) {
-					displacement.normalise();
-					
-					this.push((Vector2f)displacement.scale(entity.acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-					entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-					
-					this.collidedWith(entity);
-					entity.collidedWith(this);
-				}
-			}
+			checkForCollisionWith(entity);
 		}
 		for(LivingEntity entity: EntityManager.getPlayers()) {
-			if(entity.getID() != this.getID() && entity.canBePushed()) {
-				Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
-				float distance = displacement.length() / (hitboxRadius + entity.hitboxRadius);
+			checkForCollisionWith(entity);
+		}
+	}
+	
+	private void checkForCollisionWith(LivingEntity entity) {
+		float delta = DisplayManager.getDelta();
+		
+		if(entity.getID() != this.getID() && entity.canBePushed()) {
+			Vector2f displacement = Vector2f.sub(position, entity.getPosition(), null);
+			float distance = displacement.length() / (hitboxRadius + entity.hitboxRadius);
+			
+			if(distance < 1 && displacement.length() > 0) {
+				displacement.normalise();
+				Vector2f perpendicular = new Vector2f(-displacement.y, displacement.x);
 				
-				if(distance < 1 && displacement.length() > 0) {
-					displacement.normalise();
-					
-					this.push((Vector2f)displacement.scale(entity.acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-					entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
-					
-					this.collidedWith(entity);
-					entity.collidedWith(this);
-				}
+				float speed1 = (Vector2f.dot(velocity, displacement));
+				float speed2 = (Vector2f.dot(entity.getVelocity(), displacement));
+				float averageSpeed = (speed1 + speed2) / 2;
+				
+				Vector2f newVelocity1 = Vector2f.add((Vector2f)(new Vector2f(perpendicular)).scale(Vector2f.dot(velocity, perpendicular)),
+						(Vector2f)(new Vector2f(displacement)).scale(averageSpeed), null);
+				Vector2f newVelocity2 = Vector2f.add((Vector2f)(new Vector2f(perpendicular)).scale(Vector2f.dot(entity.getVelocity(), perpendicular)),
+						(Vector2f)(new Vector2f(displacement)).scale(averageSpeed), null);
+				
+				this.setVelocity(newVelocity1);
+				entity.setVelocity(newVelocity2);
+				
+				
+				this.push((Vector2f)displacement.scale(entity.acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
+				entity.push((Vector2f)displacement.scale(-1 * acceleration * SOFT_COLLISION_PUSH_FACTOR * delta));
+				
+				
+				this.collidedWith(entity);
+				entity.collidedWith(this);
 			}
 		}
 	}
@@ -171,8 +176,16 @@ public class LivingEntity extends AnimatedEntity {
 		
 	}
 	
+	protected void takeDamage(Bullet bullet) {
+		health -= bullet.getDamage();
+	}
+	
 	public void push(Vector2f velocity) {
 		Vector2f.add(this.velocity, velocity, this.velocity);
+	}
+	
+	public void setVelocity(Vector2f velocity) {
+		this.velocity = velocity;
 	}
 	
 	public boolean isAlive() {

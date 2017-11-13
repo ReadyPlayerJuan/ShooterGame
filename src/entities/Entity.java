@@ -14,7 +14,7 @@ public class Entity {
 	protected Vector2f position;
 	protected Vector2f spriteOffset;
 	private Vector2f size;
-	private float rotation;
+	protected float rotation;
 	private Vector2f rotatePoint;
 	
 	private EntitySprite sprite;

@@ -13,6 +13,7 @@ import postProcessing.PostProcessing;
 import renderEngine.DisplayManager;
 import renderEngine.MasterRenderer;
 import textures.TextureManager;
+import weapons.Weapon;
 
 
 public class MainGameLoop {
@@ -26,6 +27,7 @@ public class MainGameLoop {
 		/* LOAD TEXTURES */
 		loader.setFilterMode(GL11.GL_NEAREST);
 		TextureManager.loadTextures(loader);
+		Weapon.loadGunStats(loader, "baseGuns");
 		
 		
 		/* INITIALIZE PLAYERS */

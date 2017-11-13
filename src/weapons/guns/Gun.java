@@ -1,9 +1,11 @@
 package weapons.guns;
 
+import java.util.ArrayList;
+
 import org.lwjgl.util.vector.Vector2f;
 
-import entities.Entity;
 import entities.EntityManager;
+import entities.LivingEntity;
 import renderEngine.DisplayManager;
 import weapons.Bullet;
 import weapons.Weapon;
@@ -12,22 +14,25 @@ public class Gun extends Weapon {
 	private int bulletTextureIndex;
 
 	protected float fireTimer;
-	protected float speed, bulletSpeedVariation, damage, fireRate, fireAngleVariation, accuracy, pierce, kick, knockback, numBullets;
+	protected ArrayList<Float> stats;
+	protected float bulletSpeed, bulletSpeedVariation, damage, fireRate, spread, accuracy, pierce, kick, knockback, numBullets, bounce;
 	
-	public Gun(Entity owner, int bulletTextureIndex, boolean damagesPlayers, boolean damagesEnemies) {
+	public Gun(LivingEntity owner, String gunName, int bulletTextureIndex, boolean damagesPlayers, boolean damagesEnemies) {
 		super(owner, damagesPlayers, damagesEnemies);
 		this.bulletTextureIndex = bulletTextureIndex;
 		
-		speed = 300f;
-		bulletSpeedVariation = 0;
-		damage = 1f;
-		fireRate = 4.0f;
-		fireAngleVariation = (3.14159f / 24);
-		accuracy = 4.0f;
-		pierce = 0;
-		kick = 0;
-		knockback = 0;
-		numBullets = 1;
+		stats = Weapon.getStats(gunName);
+		bulletSpeed = stats.get(0);
+		bulletSpeedVariation = stats.get(1);
+		damage = stats.get(2);
+		fireRate = stats.get(3);
+		spread = stats.get(4);
+		accuracy = stats.get(5);
+		pierce = stats.get(6);
+		bounce = stats.get(7);
+		kick = stats.get(8);
+		knockback = stats.get(9);
+		numBullets = stats.get(10);
 		
 		
 		fireTimer = 1.0f / fireRate;
@@ -48,16 +53,22 @@ public class Gun extends Weapon {
 				fireTimer -= fireDelay;
 			}
 		} else {
-			fireTimer = fireDelay;
+			fireTimer += delta;
+			
+			if(fireTimer > fireDelay)
+				fireTimer = fireDelay;
 		}
 	}
 	
 	public void shoot(float direction) {
 		for(int i = 0; i < numBullets; i++) {
-			float angleVariation = (float)Math.pow(Math.random(), accuracy) * fireAngleVariation * (int)(((int)(Math.random() * 2) - 0.5) * 2);
+			float angleVariation = (float)(Math.pow(Math.random(), accuracy) * Math.toRadians(spread) * (int)(((int)(Math.random() * 2) - 0.5) * 2));
 			float speedVariation = (float)Math.random() * bulletSpeedVariation * (int)(((int)(Math.random() * 2) - 0.5) * 2);
 			
-			EntityManager.addBullet(new Bullet(damagesPlayers, damagesEnemies, bulletTextureIndex, Vector2f.add(owner.getPosition(), positionOffset, null), direction + angleVariation, speed + speedVariation, damage));
+			EntityManager.addBullet(new Bullet(damagesPlayers, damagesEnemies, bulletTextureIndex, Vector2f.add(owner.getPosition(), positionOffset, null),
+					direction + angleVariation, bulletSpeed + speedVariation, damage, knockback, pierce, bounce));
 		}
+		Vector2f directionV = new Vector2f((float)Math.cos(direction), -(float)Math.sin(direction));
+		owner.push((Vector2f)directionV.scale(kick * -1));
 	}
 }
