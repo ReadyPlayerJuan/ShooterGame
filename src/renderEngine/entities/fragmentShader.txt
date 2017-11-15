@@ -1,6 +1,7 @@
 #version 140
 
 in vec2 textureCoords;
+in vec3 pass_tint;
 
 out vec4 out_Color;
 
@@ -12,4 +13,6 @@ void main(void){
 	if(out_Color == vec4(1, 0, 1, 1)) {
 		discard;
 	}
+	
+	out_Color = vec4(out_Color.r * pass_tint.r, out_Color.g * pass_tint.g, out_Color.b * pass_tint.b, out_Color.a);
 }

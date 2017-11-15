@@ -11,6 +11,7 @@ import entities.LivingEntity;
 import entities.AI.BulletAI;
 import hitboxes.LineHitbox;
 import maps.MapHitboxes;
+import particles.Particle;
 import textures.TextureManager;
 
 public class Bullet extends LivingEntity {
@@ -68,8 +69,10 @@ public class Bullet extends LivingEntity {
 						position.x + hitboxRadius <= hitbox.getCenterPosition().x && nextPosition.x + hitboxRadius > hitbox.getCenterPosition().x) {
 					nextPosition.setX(hitbox.getCenterPosition().x - hitboxRadius);
 					
-					rotation = -rotation;
-					velocity.x *= -1;
+					if(bounce > 0) {
+						rotation = -rotation;
+						velocity.x *= -1;
+					}
 					this.collidedWith(null);
 				}
 			}
@@ -80,8 +83,10 @@ public class Bullet extends LivingEntity {
 						position.x - hitboxRadius >= hitbox.getCenterPosition().x && nextPosition.x - hitboxRadius < hitbox.getCenterPosition().x) {
 					nextPosition.setX(hitbox.getCenterPosition().x + hitboxRadius);
 					
-					rotation = -rotation;
-					velocity.x *= -1;
+					if(bounce > 0) {
+						rotation = -rotation;
+						velocity.x *= -1;
+					}
 					this.collidedWith(null);
 				}
 			}
@@ -91,9 +96,11 @@ public class Bullet extends LivingEntity {
 				if(nextPosition.x + hitboxRadius > hitbox.getEndPoint1().x && nextPosition.x - hitboxRadius < hitbox.getEndPoint2().x &&
 						position.y + hitboxRadius <= hitbox.getCenterPosition().y && nextPosition.y + hitboxRadius > hitbox.getCenterPosition().y) {
 					nextPosition.setY(hitbox.getCenterPosition().y - hitboxRadius);
-					
-					rotation = 3.14159f - rotation;
-					velocity.y *= -1;
+
+					if(bounce > 0) {
+						rotation = 3.14159f - rotation;
+						velocity.y *= -1;
+					}
 					this.collidedWith(null);
 				}
 			}
@@ -104,8 +111,10 @@ public class Bullet extends LivingEntity {
 						position.y - hitboxRadius >= hitbox.getCenterPosition().y && nextPosition.y - hitboxRadius < hitbox.getCenterPosition().y) {
 					nextPosition.setY(hitbox.getCenterPosition().y + hitboxRadius);
 					
-					rotation = 3.14159f - rotation;
-					velocity.y *= -1;
+					if(bounce > 0) {
+						rotation = 3.14159f - rotation;
+						velocity.y *= -1;
+					}
 					this.collidedWith(null);
 				}
 			}
@@ -169,7 +178,7 @@ public class Bullet extends LivingEntity {
 			entitiesHit = new ArrayList<Integer>();
 			
 			if(bounce < 0)
-				health = 0;
+				destroyBullet(true);
 		} else {
 			pierce--;
 			if(pierce < 0) {
@@ -177,7 +186,7 @@ public class Bullet extends LivingEntity {
 				entitiesHit = new ArrayList<Integer>();
 				
 				if(bounce < 0) {
-					health = 0;
+					destroyBullet(false);
 				} else {
 					Vector2f toEntity = Vector2f.sub(position, other.getPosition(), null);
 					float angleToEntity = (float)Math.atan2(toEntity.y, toEntity.x);
@@ -199,6 +208,22 @@ public class Bullet extends LivingEntity {
 			
 			Vector2f unitVector = (Vector2f)(new Vector2f(velocity)).normalise();
 			other.push((Vector2f)unitVector.scale(knockback));
+		}
+	}
+	
+	private void destroyBullet(boolean withParticles) {
+		health = 0;
+		
+		if(withParticles) {
+			for(int i = 0; i < 40; i++) {
+				float speed = velocity.length() * ((float)Math.random() * 0.2f + 0.15f);
+				float life = ((float)Math.random() * 0.35f) + 0.05f;
+				float angle = (float)Math.atan2(velocity.y, velocity.x) + ((float)Math.random() * 0.8f - 0.4f);
+				int colorTheme = 1;
+				if(Math.random() < (1.0 / 8))
+					colorTheme = 2;
+				new Particle(colorTheme, new Vector2f(position), new Vector2f(speed * (float)Math.cos(angle), speed * (float)Math.sin(angle)), speed / life / 1, life);
+			}
 		}
 	}
 	

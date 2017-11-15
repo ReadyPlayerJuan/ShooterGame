@@ -2,6 +2,7 @@ package renderEngine.entities;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import shaders.ShaderProgram;
 
@@ -12,6 +13,7 @@ public class EntityShader extends ShaderProgram {
 	private int location_transformationMatrix;
 	private int location_texCoords;
 	private int location_texSize;
+	private int location_tint;
 
 	public EntityShader() {
 		super(VERTEX_FILE, FRAGMENT_FILE);
@@ -19,6 +21,10 @@ public class EntityShader extends ShaderProgram {
 	
 	public void loadTransformation(Matrix4f matrix) {
 		super.loadMatrix(location_transformationMatrix, matrix);
+	}
+	
+	public void loadTint(Vector3f tint) {
+		super.loadVector(location_tint, tint);
 	}
 	
 	public void setTextureSize(float width, float height) {
@@ -34,6 +40,7 @@ public class EntityShader extends ShaderProgram {
 		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
 		location_texCoords = super.getUniformLocation("texCoords");
 		location_texSize = super.getUniformLocation("texSize");
+		location_tint = super.getUniformLocation("tint");
 	}
 
 	@Override

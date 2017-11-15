@@ -15,7 +15,7 @@ public class TestEnemy extends Enemy {
 		
 		ai = new BulletAI(this, new Vector2f());
 		weapon = new Pistol(this, true, false);
-		health = 100;
+		health = 80;
 		
 		hitboxRadius = 8f;
 		maxVelocity = 100f;

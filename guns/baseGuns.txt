@@ -30,7 +30,7 @@ name: sniper
 ------------------
 bulletSpeed = 500
 bulletSpeedVariation = 10
-damage = 35
+damage = 45
 fireRate = 0.9
 spread = 7.5
 accuracy = 6.0
@@ -58,7 +58,7 @@ name: revolver
 ------------------
 bulletSpeed = 420
 bulletSpeedVariation = 20
-damage = 16
+damage = 13
 fireRate = 12.0
 spread = 12
 accuracy = 4.0

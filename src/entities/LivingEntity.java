@@ -4,8 +4,10 @@ import org.lwjgl.util.vector.Vector2f;
 
 import entities.AI.AI;
 import entities.AI.TestAI;
+import entities.numbers.NumberString;
 import hitboxes.LineHitbox;
 import maps.MapHitboxes;
+import particles.Particle;
 import renderEngine.DisplayManager;
 import weapons.Bullet;
 import weapons.Weapon;
@@ -181,6 +183,45 @@ public class LivingEntity extends AnimatedEntity {
 	
 	protected void takeDamage(Bullet bullet) {
 		health -= bullet.getDamage();
+		
+		{
+			float direction = -(3.14159f / 2) + ((float)Math.random() * 0.3f * randPosOrNeg());
+			float distance = hitboxRadius + 2;
+			float speed = 50f;
+			new NumberString((int)bullet.getDamage(), false, new Vector2f(position.x + distance * (float)Math.cos(direction), position.y + distance * (float)Math.sin(direction)),
+					new Vector2f(speed * (float)Math.cos(direction), speed * (float)Math.sin(direction)), 40);
+		};
+		
+		
+		if(health > 0) {
+			Vector2f particlePosition = new Vector2f(bullet.getPosition());
+			float distance = -4f;
+			Vector2f.add(particlePosition, (Vector2f)(new Vector2f(bullet.getVelocity())).normalise(null).scale(-distance), particlePosition);
+			
+			float bulletDirection = (float)Math.atan2(bullet.getVelocity().y, bullet.getVelocity().x);
+			float particleDirection = (float)Math.atan2(position.y - particlePosition.y, position.x - particlePosition.x);
+			particleDirection = 3.14159f + (particleDirection + bulletDirection) / 2;
+			
+			for(int i = 0; i < 50; i++) {
+				float speed = bullet.getVelocity().length() * ((float)Math.random() * 0.4f + 0.1f);
+				float life = ((float)Math.random() * 0.4f) + 0.05f;
+				float angle = particleDirection + ((float)Math.pow(Math.random(), 2) * 1.1f * randPosOrNeg());
+				new Particle(0, new Vector2f(particlePosition), new Vector2f(speed * (float)Math.cos(angle) + velocity.x, speed * (float)Math.sin(angle) + velocity.y), speed / life / 1.2f, life);
+			}
+		} else {
+			Vector2f particlePosition = new Vector2f(position);
+			
+			for(int i = 0; i < 450; i++) {
+				float speed = 400f * ((float)Math.random() * 0.55f + 0.0f);
+				float life = ((float)Math.pow(Math.random(), 3) * 0.7f) + 0.1f;
+				float angle = (float)Math.random() * 3.14159f * 2;
+				new Particle(0, new Vector2f(particlePosition), new Vector2f(speed * (float)Math.cos(angle) + velocity.x, speed * (float)Math.sin(angle) + velocity.y), speed / life / 1.1f, life);
+			}
+		}
+	}
+	
+	private float randPosOrNeg() {
+		return (float)((int)(Math.random() * 2)) * 2 - 1;
 	}
 	
 	public void push(Vector2f velocity) {

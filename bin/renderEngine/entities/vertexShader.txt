@@ -3,9 +3,11 @@
 in vec2 position;
 
 out vec2 textureCoords;
+out vec3 pass_tint;
 
 uniform mat4 transformationMatrix;
 
+uniform vec3 tint;
 uniform vec2 texCoords;
 uniform vec2 texSize;
 
@@ -13,4 +15,5 @@ void main(void){
 	gl_Position = transformationMatrix * vec4(position, 0.0, 1.0) + vec4(-1, 1, 0, 0);
 	
 	textureCoords = vec2((position.x * texSize.x) + texCoords.x, ((1 - position.y) * texSize.y) + texCoords.y);
+	pass_tint = tint;
 }

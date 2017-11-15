@@ -30,7 +30,7 @@ public class EntityRenderer {
 		shader = new EntityShader();
 	}
 	
-	public void renderLayer(Map<Integer, List<Entity>> entities, Fbo fbo, Vector2f mapPosition) {
+	public void renderLayer(Map<Integer, List<Entity>> entities, Fbo fbo, Vector2f mapPosition, Vector3f tint) {
 		shader.start();
 		GL30.glBindVertexArray(quad.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
@@ -38,7 +38,7 @@ public class EntityRenderer {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
-		
+		shader.loadTint(tint);
 		for(Integer textureMapIndex: entities.keySet()) {
 			TextureMap textureMap = TextureManager.getTexture(textureMapIndex);
 			
@@ -60,9 +60,11 @@ public class EntityRenderer {
 				Matrix4f.setIdentity(matrix);
 				Matrix4f.translate(new Vector2f(position.x * 2 / fbo.getWidth(), -position.y * 2 / fbo.getHeight()), matrix, matrix);
 				
-				Matrix4f.translate(new Vector2f(textureMap.getTextureWidthPx() * entity.getRotatePoint().x * 2 / fbo.getWidth(), textureMap.getTextureHeightPx() * entity.getRotatePoint().y * 2 / fbo.getHeight()), matrix, matrix);
+				Matrix4f.translate(new Vector2f(textureMap.getTextureWidthPx() * entity.getRotatePoint().x * 2 / fbo.getWidth(),
+						textureMap.getTextureHeightPx() * entity.getRotatePoint().y * 2 / fbo.getHeight()), matrix, matrix);
 				Matrix4f.rotate(rotation, new Vector3f(0, 0, 1), matrix, matrix);
-				Matrix4f.translate(new Vector2f(-textureMap.getTextureWidthPx() * entity.getRotatePoint().x * 2 / fbo.getWidth(), -textureMap.getTextureHeightPx() * entity.getRotatePoint().y * 2 / fbo.getHeight()), matrix, matrix);
+				Matrix4f.translate(new Vector2f(-textureMap.getTextureWidthPx() * entity.getRotatePoint().x * 2 / fbo.getWidth(),
+						-textureMap.getTextureHeightPx() * entity.getRotatePoint().y * 2 / fbo.getHeight()), matrix, matrix);
 
 				Matrix4f.scale(new Vector3f(scale.x * 2 / fbo.getWidth(), scale.y * 2 / fbo.getHeight(), 1.0f), matrix, matrix);
 				

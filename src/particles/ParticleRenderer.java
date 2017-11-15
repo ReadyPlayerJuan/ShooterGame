@@ -5,11 +5,9 @@ import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
-import org.lwjgl.opengl.GL33;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -33,7 +31,7 @@ public class ParticleRenderer {
 		
 		vao = loader.loadVAO();
 		vbo = loader.createEmptyVbo(MAX_INSTANCES * INSTANCE_DATA_LENGTH);
-		System.out.println(vao);
+		
 		loader.addAttribute(vao, vbo, 0, 2, INSTANCE_DATA_LENGTH, 0);
 		loader.addAttribute(vao, vbo, 1, 4, INSTANCE_DATA_LENGTH, 8);
 		
@@ -47,7 +45,7 @@ public class ParticleRenderer {
 		float[] vboData = new float[particles.size() * INSTANCE_DATA_LENGTH];
 		
 		for(Particle particle: particles) {
-			Vector2f position = new Vector2f(particle.getPosition().x - mapPosition.x, particle.getPosition().y - mapPosition.y);
+			Vector2f position = new Vector2f(particle.getPosition().x - mapPosition.x, fbo.getHeight() - particle.getPosition().y - mapPosition.y);
 			position = new Vector2f(position.x * 2 / fbo.getWidth(), position.y * 2 / fbo.getHeight());
 			
 			storeParticleData(position, particle.getColor(), vboData);

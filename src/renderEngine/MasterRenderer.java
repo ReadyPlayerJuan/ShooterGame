@@ -1,12 +1,16 @@
 package renderEngine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
+import entities.Entity;
 import entities.EntityManager;
 import entities.player.Player;
 import guis.GuiTexture;
@@ -19,6 +23,7 @@ import postProcessing.PostProcessing;
 import renderEngine.entities.EntityRenderer;
 import renderEngine.guis.GuiRenderer;
 import renderEngine.maps.TerrainRenderer;
+import textures.TextureManager;
 
 public class MasterRenderer {
 	private EntityRenderer entityRenderer;
@@ -51,7 +56,7 @@ public class MasterRenderer {
 			
 			backgroundFbo.bindFrameBuffer();
 			//clearScreen();
-			entityRenderer.renderLayer(EntityManager.getBackgroundEntitiesSorted(), backgroundFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getBackgroundEntitiesSorted(), backgroundFbo, map.getPosition(), new Vector3f(1, 1, 1));
 			backgroundFbo.unbindFrameBuffer();
 			break;
 			
@@ -61,13 +66,19 @@ public class MasterRenderer {
 			entityFbo.bindFrameBuffer();
 			
 			clearScreen();
-			entityRenderer.renderLayer(EntityManager.getPlayersSorted(), entityFbo, map.getPosition());
-			entityRenderer.renderLayer(EntityManager.getEnemiesSorted(), entityFbo, map.getPosition());
-			entityRenderer.renderLayer(EntityManager.getBulletsSorted(), entityFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getPlayersSorted(), entityFbo, map.getPosition(), new Vector3f(1, 1, 1));
+			entityRenderer.renderLayer(EntityManager.getEnemiesSorted(), entityFbo, map.getPosition(), new Vector3f(1, 1, 1));
+			entityRenderer.renderLayer(EntityManager.getBulletsSorted(), entityFbo, map.getPosition(), new Vector3f(1, 1, 1));
 			
 			GL11.glPointSize(1f);
 			ParticleMaster.update();
 			particleRenderer.render(ParticleMaster.getParticles(), entityFbo, map.getPosition());
+			
+			
+			Map<Integer, List<Entity>> numberMap = new HashMap<Integer, List<Entity>>();
+			List<Entity> numberArray = ParticleMaster.getDamageNumbers();
+			numberMap.put(TextureManager.NUMBERS_TEXTURE, numberArray);
+			entityRenderer.renderLayer(numberMap, entityFbo, map.getPosition(), new Vector3f(1.0f, 0.0f, 0.0f));
 			
 			entityFbo.unbindFrameBuffer();
 			break;
@@ -77,7 +88,7 @@ public class MasterRenderer {
 			
 			foregroundFbo.bindFrameBuffer();
 			//clearScreen();
-			entityRenderer.renderLayer(EntityManager.getForegroundEntitiesSorted(), foregroundFbo, map.getPosition());
+			entityRenderer.renderLayer(EntityManager.getForegroundEntitiesSorted(), foregroundFbo, map.getPosition(), new Vector3f(1, 1, 1));
 			foregroundFbo.unbindFrameBuffer();
 			break;
 		}

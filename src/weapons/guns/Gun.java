@@ -6,6 +6,7 @@ import org.lwjgl.util.vector.Vector2f;
 
 import entities.EntityManager;
 import entities.LivingEntity;
+import particles.Particle;
 import renderEngine.DisplayManager;
 import weapons.Bullet;
 import weapons.Weapon;
@@ -70,5 +71,19 @@ public class Gun extends Weapon {
 		}
 		Vector2f directionV = new Vector2f((float)Math.cos(direction), -(float)Math.sin(direction));
 		owner.push((Vector2f)directionV.scale(kick * -1));
+		
+
+		
+		
+		Vector2f particlePosition = new Vector2f(owner.getPosition());
+		//float distance = 0f;
+		//Vector2f.add(particlePosition, (Vector2f)(new Vector2f(bullet.getVelocity())).normalise(null).scale(-distance), particlePosition);
+		
+		for(int i = 0; i < 90; i++) {
+			float pspeed = 400f * ((float)Math.random() * 0.5f + 0.4f);
+			float life = ((float)Math.random() * 0.4f) + 0.05f;
+			float angle = direction + ((float)Math.random() * 0.7f - 0.35f);
+			new Particle(2, new Vector2f(particlePosition), new Vector2f(pspeed * (float)Math.cos(angle) + owner.getVelocity().x, -pspeed * (float)Math.sin(angle) + owner.getVelocity().y), pspeed / life / 1.0f, life);
+		}
 	}
 }

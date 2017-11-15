@@ -18,8 +18,9 @@ public class Player extends LivingEntity {
 		this.entityType = "player";
 		addAnimation(new EntityAnimation(TextureManager.TERRAIN_TEXTURE, new int[] {90}));
 		
+		health = 9999;
 		ai = new PlayerController(this);
-		weapon = new Revolver(this, false, true);
+		weapon = new Sniper(this, false, true);
 		weapon.setOffset(new Vector2f());
 		
 		spriteOffset = new Vector2f(-8, 8);

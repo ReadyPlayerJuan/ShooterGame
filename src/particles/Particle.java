@@ -7,22 +7,18 @@ import renderEngine.DisplayManager;
 
 public class Particle {
 	private Vector2f position, velocity;
-	private float size;
 	private float decceleration;
-	private float rotation;
 	
 	private Vector4f color;
 	private float lifeSpan;
 
-	public Particle(Vector2f position, Vector2f velocity, float decceleration, float size, float rotation, float lifeSpan) {
+	public Particle(int colorTheme, Vector2f position, Vector2f velocity, float decceleration, float lifeSpan) {
 		this.position = position;
 		this.velocity = velocity;
 		this.decceleration = decceleration;
-		this.size = size;
-		this.rotation = rotation;
 		this.lifeSpan = lifeSpan;
 		
-		color = new Vector4f(1, 1, 1, 0.5f);//new Vector4f((float)Math.random(), (float)Math.random(), (float)Math.random(), 1);
+		color = ParticleMaster.getParticleColor(colorTheme);
 		
 		ParticleMaster.addParticle(this);
 	}
@@ -51,16 +47,8 @@ public class Particle {
 		return velocity;
 	}
 
-	public float getSize() {
-		return size;
-	}
-
 	public float getDecceleration() {
 		return decceleration;
-	}
-
-	public float getRotation() {
-		return rotation;
 	}
 
 	public float getLifeSpan() {
