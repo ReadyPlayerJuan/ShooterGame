@@ -13,7 +13,7 @@ public class TestEnemy extends Enemy {
 		super(position);
 		addAnimation(new EntityAnimation(TextureManager.TERRAIN_TEXTURE, new int[] {72}));
 		
-		ai = new BulletAI(this, new Vector2f());
+		ai = new ShooterAI(this);
 		weapon = new Pistol(this, true, false);
 		health = 80;
 		

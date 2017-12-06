@@ -263,4 +263,8 @@ public class LivingEntity extends AnimatedEntity {
 	public boolean canBePushed() {
 		return canBePushed;
 	}
+	
+	public Weapon getWeapon() {
+		return weapon;
+	}
 }

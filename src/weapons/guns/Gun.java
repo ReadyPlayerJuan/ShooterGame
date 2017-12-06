@@ -43,7 +43,7 @@ public class Gun extends Weapon {
 	@Override
 	public void update(boolean attacking, float direction) {
 		float delta = DisplayManager.getDelta();
-
+		
 		float fireDelay = 1.0f / fireRate;
 		if(attacking) {
 			fireTimer += delta;
@@ -85,5 +85,9 @@ public class Gun extends Weapon {
 			float angle = direction + ((float)Math.random() * 0.7f - 0.35f);
 			new Particle(2, new Vector2f(particlePosition), new Vector2f(pspeed * (float)Math.cos(angle) + owner.getVelocity().x, -pspeed * (float)Math.sin(angle) + owner.getVelocity().y), pspeed / life / 1.0f, life);
 		}
+	}
+	
+	public float getBulletSpeed() {
+		return bulletSpeed;
 	}
 }

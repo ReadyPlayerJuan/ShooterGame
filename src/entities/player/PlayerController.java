@@ -29,7 +29,7 @@ public class PlayerController extends AI {
 		if(Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 			Vector2f.add(new Vector2f(1, 0), movementDirection, movementDirection);
 		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Mouse.isButtonDown(0)) {
 			attacking = true;
 			attackDirection = (float)Math.atan2(Mouse.getY() - DisplayManager.HEIGHT/2, Mouse.getX() - DisplayManager.WIDTH/2);
 		} else {

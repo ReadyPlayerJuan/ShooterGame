@@ -20,7 +20,7 @@ public class Player extends LivingEntity {
 		
 		health = 9999;
 		ai = new PlayerController(this);
-		weapon = new Sniper(this, false, true);
+		weapon = new Shotgun(this, false, true);
 		weapon.setOffset(new Vector2f());
 		
 		spriteOffset = new Vector2f(-8, 8);
